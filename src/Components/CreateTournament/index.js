@@ -10,6 +10,17 @@ const TournamentTypes = [
   },
 ];
 
+const PlayersData = [
+  {
+    name: '',
+    team: ''
+  },
+  {
+    name: '',
+    team: ''
+  }
+]
+
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: '0 40px'
@@ -22,6 +33,10 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: 20
     }
   },
+  playerTeamBox: {
+    display: 'flex',
+    flexDirection: 'column'
+  }
 
 }));
 
@@ -29,10 +44,38 @@ const CreateTournament = () => {
   const classes = useStyles();
 
   const [tournamentType, setTournamentType] = React.useState('league');
+  const [numberOfPlayers, setNumberOfPlayers] = React.useState(2);
+  const [players, setPlayers] = React.useState(PlayersData);
 
   const handleChange = (event) => {
     setTournamentType(event.target.value);
   };
+
+  const handleNumberOfPlayersChange = (event) => {
+    const newNumber = event.target.value;
+    if (newNumber < 2) return setNumberOfPlayers(2)
+    else if (newNumber > 20) return setNumberOfPlayers(20)
+    
+    // Increased: Add new player's box
+    if (newNumber > numberOfPlayers) {
+      const newPlayer = {
+        name: '',
+        team: ''
+      }
+
+      setPlayers([...players, newPlayer]);
+    }
+
+    // Decresead: Remove last player's box
+    if (newNumber < numberOfPlayers) {
+      const newPlayers = players.slice(0, -1);
+      setPlayers(newPlayers);
+    }
+
+    setNumberOfPlayers(newNumber);
+
+    
+  }
 
   return ( 
     <div className={classes.root}>
@@ -58,6 +101,20 @@ const CreateTournament = () => {
               </MenuItem>
             ))}
           </TextField>
+          <TextField id="outlined-basic"
+            label="Number of players" 
+            variant="outlined" 
+            helperText="Please enter a name for the tournament"
+            type="number"
+            value={numberOfPlayers}
+            onChange={handleNumberOfPlayersChange}
+          />
+          {players.map((player) => (
+            <div class={classes.playerTeamBox}>
+              <TextField id="filled-search" label="Name" type="search" variant="filled" />
+              <TextField id="filled-search" label="Team" type="search" variant="filled" />
+            </div>
+          ))}
         </div>
       </div>
     </div>
