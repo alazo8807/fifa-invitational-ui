@@ -90,7 +90,11 @@ const CreateTournament = () => {
   const [errors, setErrors] = useState({});
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
 
+  /**
+   * Validate all required fields.
+   */
   const validate = () => {
+    // playerName and playerTeam are schemas for onBlur validation of the field. Ignore here.
     const validateSchema = {...schema};
     delete validateSchema['playerName'];
     delete validateSchema['playerTeam'];
@@ -102,6 +106,9 @@ const CreateTournament = () => {
     return errors;
   };
 
+  /**
+   * Validate a specific field
+   */
   const validateProperty = (name, value) => {
     if (!name) return null;
 
@@ -109,14 +116,23 @@ const CreateTournament = () => {
     return error ? error.details[0].message : null;
   };
   
+  /**
+   * Handle Name changed
+   */
   const handleNameChanged = (event) => {
     setName(event.target.value);
   };
   
+  /**
+   * Handle Tournament Type changed
+   */
   const handleTournamentTypeChange = (event) => {
     setTournamentType(event.target.value);
   };
 
+  /**
+   * Hanlde # of players changed
+   */
   const handleNumberOfPlayersChange = (event) => {
     const newNumber = event.target.value;
     if (newNumber < 2) return setNumberOfPlayers(2)
@@ -142,6 +158,9 @@ const CreateTournament = () => {
     setNumberOfPlayers(newNumber);
   }
 
+  /**
+   * Handle Player name changed
+   */
   const handlePlayerNameChange = (event, id) => {
     const playersCopy = [...players];
     const player = playersCopy.find(p => p.id === id);
@@ -155,6 +174,9 @@ const CreateTournament = () => {
     setPlayers(playersCopy);
   }
 
+  /**
+   * Handle Player team changed
+   */
   const handlePlayerTeamChange = (event, id) => {
     const playersCopy = [...players];
     const player = playersCopy.find(p => p.id === id);
@@ -167,6 +189,12 @@ const CreateTournament = () => {
     setPlayers(playersCopy);
   }
 
+  /**
+   * Handle blur event for player's name and team fields.
+   * @param {event} - Event object
+   * @param {id} id - Id of the player's name and team combination.
+   * @param {label} - Label of the field. Used for updating error message.
+   */
   const handleBlur = ({ event, id, label }) => {
     const propertyName = event.currentTarget.name;
     const value = event.target.value;
@@ -184,12 +212,14 @@ const CreateTournament = () => {
     setErrors(errorsCopy);
   }
 
+  /**
+   * Handle submit (Create tournament clicked)
+   */
   const handleSubmit = () => {
     const errorsValidate = validate();
     if (errorsValidate) {
-      console.log(errorsValidate);
-      
       setOpenErrorDialog(true);
+      return;
     } 
   }
 
