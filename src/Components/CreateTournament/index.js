@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import Alert from '@material-ui/lab/Alert';
 import Joi from 'joi';
+import ErrorDialog from './ErrorDialog';
 
 const TournamentTypes = [
   {
@@ -36,11 +37,13 @@ const schema = {
   type: Joi.string()
       .alphanum()
       .required(),
+
   playerName: Joi.string().min(3).max(20).required(),
   playerTeam: Joi.string().min(3).max(20).required(),
 
   players: Joi.array().items(
     Joi.object({
+      id: Joi.string(),
       name: Joi.string().min(1).max(20).required(),
       team: Joi.string().min(2).max(20).required()
     })
@@ -85,6 +88,19 @@ const CreateTournament = () => {
   const [numberOfPlayers, setNumberOfPlayers] = useState(2);
   const [players, setPlayers] = useState(PlayersData);
   const [errors, setErrors] = useState({});
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
+
+  const validate = () => {
+    const validateSchema = {...schema};
+    delete validateSchema['playerName'];
+    delete validateSchema['playerTeam'];
+    const { error } = Joi.object(validateSchema).validate({ name, type: tournamentType, players }, { abortEarly: false });
+    if (!error) return null;
+
+    const errors = {};
+    for (let item of error.details) errors[item.path[0]] = item.message;
+    return errors;
+  };
 
   const validateProperty = (name, value) => {
     if (!name) return null;
@@ -94,18 +110,6 @@ const CreateTournament = () => {
   };
   
   const handleNameChanged = (event) => {
-    const propertyName = event.currentTarget.name;
-    const value = event.target.value;
-    const errorMessage = validateProperty(propertyName, value);
-    
-    const errorsCopy = {...errors};
-    if (errorMessage) {
-      errorsCopy[propertyName] = errorMessage;
-    } else {
-      delete errorsCopy[propertyName]; 
-    }
-
-    setErrors(errorsCopy);
     setName(event.target.value);
   };
   
@@ -151,25 +155,6 @@ const CreateTournament = () => {
     setPlayers(playersCopy);
   }
 
-  const handlePlayerNameBlur = (event, id) => {
-    const propertyName = event.currentTarget.name;
-    const value = event.target.value;
-    const errorMessage = validateProperty(propertyName, value);
-    
-    const errorsCopy = {...errors};
-    if (errorMessage) {
-      errorsCopy[`${propertyName}_${id}`] = errorMessage;
-      console.log('here2');
-      
-    } else {
-      console.log('here');
-      
-      delete errorsCopy[`${propertyName}_${id}`]; 
-    }
-
-    setErrors(errorsCopy);
-  }
-
   const handlePlayerTeamChange = (event, id) => {
     const playersCopy = [...players];
     const player = playersCopy.find(p => p.id === id);
@@ -182,8 +167,30 @@ const CreateTournament = () => {
     setPlayers(playersCopy);
   }
 
+  const handleBlur = ({ event, id, label }) => {
+    const propertyName = event.currentTarget.name;
+    const value = event.target.value;
+    const errorMessage = validateProperty(propertyName, value);
+    
+    const errorsCopy = {...errors};
+    const key = id ? `${propertyName}_${id}` : [propertyName];
+    if (errorMessage) {
+      const updatedErrorMessage = errorMessage.replace(`${propertyName}`, `${label}`);
+      errorsCopy[key] = updatedErrorMessage;
+    } else {      
+      delete errorsCopy[key]; 
+    }
+
+    setErrors(errorsCopy);
+  }
+
   const handleSubmit = () => {
-    const { error, value } = schema.validate({ name, type: tournamentType, players }, { abortEarly: false });
+    const errorsValidate = validate();
+    if (errorsValidate) {
+      console.log(errorsValidate);
+      
+      setOpenErrorDialog(true);
+    } 
   }
 
   return ( 
@@ -197,15 +204,15 @@ const CreateTournament = () => {
             variant="outlined" 
             helperText="Please enter a name for the tournament"
             onChange={handleNameChanged}
-            error={errors['name']}
+            onBlur={(event) => handleBlur({ event, label: "Name" })}
+            error={errors['name'] && errors['name'].length > 0}
             helperText={errors['name']} />
           <TextField
             id="outlined-select-currency"
             select
-            label="Select"
+            label="Tournament type"
             value={tournamentType}
             onChange={handleTournamentTypeChange}
-            helperText="Please select a tournament type"
             variant="outlined"
           >
             {TournamentTypes.map((option) => (
@@ -233,9 +240,8 @@ const CreateTournament = () => {
                 type="search"
                 variant="filled"
                 error={errors[`playerName_${player.id}`] !== undefined}
-                // helperText={errors[`playerName_${player.id}`]}
                 onChange={(event) => handlePlayerNameChange(event, player.id)}
-                onBlur={(event) => handlePlayerNameBlur(event, player.id)} />
+                onBlur={(event) => handleBlur({ event, id: player.id, label: "Player name" })} />
               <TextField
                 id={`team_${player.id}`}
                 name="playerTeam"
@@ -243,8 +249,8 @@ const CreateTournament = () => {
                 type="search"
                 variant="filled"
                 error={errors[`playerTeam_${player.id}`] !== undefined}
-                helperText={errors[`playerTeam_${player.id}`]}
-                onChange={(event) => handlePlayerTeamChange(event, player.id)}/>
+                onChange={(event) => handlePlayerTeamChange(event, player.id)}
+                onBlur={(event) => handleBlur({ event, id: player.id, label: "Player team" })} />
             </div>
           ))}
         </div>
@@ -257,10 +263,14 @@ const CreateTournament = () => {
           variant="contained"
           color="primary"
           size="large"
+          disabled={Object.entries(errors).length > 0}
           onClick={handleSubmit}>
-          Create Tournament
+            Create Tournament
         </Button>
       </div>
+      <ErrorDialog
+        open={openErrorDialog}
+        onCloseErrorDialog={() => setOpenErrorDialog(false)}/>
     </div>
    );
 }
