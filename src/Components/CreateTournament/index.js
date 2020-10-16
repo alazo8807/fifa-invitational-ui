@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CreateTournament = () => {
+const CreateTournament = (props) => {
   const classes = useStyles();
   const appContext = useContext(AppContext);
 
@@ -234,14 +234,29 @@ const CreateTournament = () => {
       return;
     }
 
+    const matches = [];
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i+1; j < players.length; j++){
+        const match = {
+          id: Math.random().toString(36).substr(7),
+          playerA: { ...players[i], goals: 0 },
+          playerB: { ...players[j], goasl: 0 }
+        }
+
+        matches.push(match);
+      }
+    }
+
     const newTournament = {
       id: Math.random().toString(36).substr(7),
       name,
       tournamentType,
       numberOfPlayers,
-      players
+      players,
+      matches
     }
     appContext.onCreateTournament(newTournament);
+    props.history.push(`/tournamentDashboard/${newTournament.id}`)
   }
 
   return ( 
