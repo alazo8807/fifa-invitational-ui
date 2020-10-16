@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -6,6 +6,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Alert from '@material-ui/lab/Alert';
 import Joi from 'joi';
 import ErrorDialog from './ErrorDialog';
+import AppContext from '../../Context/appContext';
 
 const TournamentTypes = [
   {
@@ -82,6 +83,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateTournament = () => {
   const classes = useStyles();
+  const appContext = useContext(AppContext);
 
   const [name, setName] = useState('');
   const [tournamentType, setTournamentType] = useState('league');
@@ -220,7 +222,16 @@ const CreateTournament = () => {
     if (errorsValidate) {
       setOpenErrorDialog(true);
       return;
-    } 
+    }
+
+    const newTournament = {
+      id: Math.random().toString(36).substr(7),
+      name,
+      tournamentType,
+      numberOfPlayers,
+      players
+    }
+    appContext.onCreateTournament(newTournament);
   }
 
   return ( 
