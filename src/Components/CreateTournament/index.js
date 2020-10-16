@@ -239,8 +239,8 @@ const CreateTournament = (props) => {
       for (let j = i+1; j < players.length; j++){
         const match = {
           id: Math.random().toString(36).substr(7),
-          playerA: { ...players[i], goals: 0 },
-          playerB: { ...players[j], goasl: 0 }
+          playerA: { ...players[i], goals: null },
+          playerB: { ...players[j], goasl: null }
         }
 
         matches.push(match);

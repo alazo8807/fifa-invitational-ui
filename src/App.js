@@ -33,12 +33,28 @@ function App() {
     }
   },[]);
 
+  const handleUpdateTournament = (tournament) => {
+    const newTournaments = [...tournaments];
+    const tournamentInDb = newTournaments.find(t => t.id === tournament.id);
+    if (!tournamentInDb) return;
+
+    const index = newTournaments.indexOf(tournamentInDb);
+    if (index === null || index < 0) return;
+
+    newTournaments[index] = {...tournament};
+    setTournaments([newTournaments])
+  }
+
   const createTournamentHandle = (tournament) => {
     setTournaments([...tournaments, tournament]);
   }
 
   return (
-    <AppContext.Provider value={{tournaments, onCreateTournament: createTournamentHandle}}>
+    <AppContext.Provider 
+      value={
+        {tournaments,
+        onCreateTournament: createTournamentHandle,
+        onUpdateTournament: handleUpdateTournament}}>
       <div className="App">
         <Switch>
           <Route path="/createTournament" component={CreateTournament}></Route>
