@@ -53,12 +53,16 @@ const schema = {
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: '0 40px'
+    margin: '20px 40px'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
+  },
+  formInputGroup: {
     maxWidth: 400,
+    display: 'flex',
+    flexDirection: 'column',
     '& > *': {
       marginBottom: 20
     }
@@ -71,17 +75,23 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexWrap: 'wrap',
     '& > *': {
-      margin: theme.spacing(1),
+      marginTop: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      marginBottom: theme.spacing(1),
     }
   },
   errors: {
     '& > *': {
-      margin: theme.spacing(1),
+      margin: `${theme.spacing(1)}px 0`
     }
+  },
+  submitBtn: {
+    margin: `${theme.spacing(2)}px 0`,
+    maxWidth: 400
   }
 }));
 
-const CreateTournament = () => {
+const CreateTournament = (props) => {
   const classes = useStyles();
   const appContext = useContext(AppContext);
 
@@ -224,14 +234,29 @@ const CreateTournament = () => {
       return;
     }
 
+    const matches = [];
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i+1; j < players.length; j++){
+        const match = {
+          id: Math.random().toString(36).substr(7),
+          playerA: { ...players[i], goals: 0 },
+          playerB: { ...players[j], goasl: 0 }
+        }
+
+        matches.push(match);
+      }
+    }
+
     const newTournament = {
       id: Math.random().toString(36).substr(7),
       name,
       tournamentType,
       numberOfPlayers,
-      players
+      players,
+      matches
     }
     appContext.onCreateTournament(newTournament);
+    props.history.push(`/tournamentDashboard/${newTournament.id}`)
   }
 
   return ( 
@@ -239,75 +264,77 @@ const CreateTournament = () => {
       <div>
         <h1>Create Tournament</h1>
         <div className={classes.form}>
-          <TextField id="outlined-basic"
-            label="Name" 
-            name="name"
-            variant="outlined" 
-            helperText="Please enter a name for the tournament"
-            onChange={handleNameChanged}
-            onBlur={(event) => handleBlur({ event, label: "Name" })}
-            error={errors['name'] && errors['name'].length > 0}
-            helperText={errors['name']} />
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Tournament type"
-            value={tournamentType}
-            onChange={handleTournamentTypeChange}
-            variant="outlined"
-          >
-            {TournamentTypes.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
+          <div className={classes.formInputGroup}>
+            <TextField id="outlined-basic"
+              label="Name" 
+              name="name"
+              variant="outlined" 
+              helperText="Please enter a name for the tournament"
+              onChange={handleNameChanged}
+              onBlur={(event) => handleBlur({ event, label: "Name" })}
+              error={errors['name'] && errors['name'].length > 0}
+              helperText={errors['name']} />
+            <TextField
+              id="outlined-select-currency"
+              select
+              label="Tournament type"
+              value={tournamentType}
+              onChange={handleTournamentTypeChange}
+              variant="outlined"
+            >
+              {TournamentTypes.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField id="outlined-basic"
+              label="Number of players" 
+              variant="outlined"
+              type="number"
+              value={numberOfPlayers}
+              onChange={handleNumberOfPlayersChange}
+            />
+          </div>
+          <div className={classes.playersTeamsForm}>
+            {players.map((player) => (
+              <div id={`player_team_${player.id}`} className={classes.playerTeamBox}>
+                <TextField
+                  id={`player_${player.id}`}
+                  label="Name"
+                  name="playerName"
+                  type="search"
+                  variant="filled"
+                  error={errors[`playerName_${player.id}`] !== undefined}
+                  onChange={(event) => handlePlayerNameChange(event, player.id)}
+                  onBlur={(event) => handleBlur({ event, id: player.id, label: "Player name" })} />
+                <TextField
+                  id={`team_${player.id}`}
+                  name="playerTeam"
+                  label="Team"
+                  type="search"
+                  variant="filled"
+                  error={errors[`playerTeam_${player.id}`] !== undefined}
+                  onChange={(event) => handlePlayerTeamChange(event, player.id)}
+                  onBlur={(event) => handleBlur({ event, id: player.id, label: "Player team" })} />
+              </div>
             ))}
-          </TextField>
-          <TextField id="outlined-basic"
-            label="Number of players" 
-            variant="outlined" 
-            helperText="Please enter a name for the tournament"
-            type="number"
-            value={numberOfPlayers}
-            onChange={handleNumberOfPlayersChange}
-          />
+          </div>
+          <div className={classes.errors}>
+            {Object.keys(errors).map(key => (
+              <Alert severity="error">{errors[key]}</Alert>
+            ))}
+          </div>
+          <Button 
+            variant="contained"
+            className={classes.submitBtn}
+            color="primary"
+            size="large"
+            disabled={Object.entries(errors).length > 0}
+            onClick={handleSubmit}>
+              Create Tournament
+          </Button>
         </div>
-        <div className={classes.playersTeamsForm}>
-          {players.map((player) => (
-            <div id={`player_team_${player.id}`} className={classes.playerTeamBox}>
-              <TextField
-                id={`player_${player.id}`}
-                label="Name"
-                name="playerName"
-                type="search"
-                variant="filled"
-                error={errors[`playerName_${player.id}`] !== undefined}
-                onChange={(event) => handlePlayerNameChange(event, player.id)}
-                onBlur={(event) => handleBlur({ event, id: player.id, label: "Player name" })} />
-              <TextField
-                id={`team_${player.id}`}
-                name="playerTeam"
-                label="Team"
-                type="search"
-                variant="filled"
-                error={errors[`playerTeam_${player.id}`] !== undefined}
-                onChange={(event) => handlePlayerTeamChange(event, player.id)}
-                onBlur={(event) => handleBlur({ event, id: player.id, label: "Player team" })} />
-            </div>
-          ))}
-        </div>
-        <div className={classes.errors}>
-          {Object.keys(errors).map(key => (
-            <Alert severity="error">{errors[key]}</Alert>
-          ))}
-        </div>
-        <Button 
-          variant="contained"
-          color="primary"
-          size="large"
-          disabled={Object.entries(errors).length > 0}
-          onClick={handleSubmit}>
-            Create Tournament
-        </Button>
       </div>
       <ErrorDialog
         open={openErrorDialog}
@@ -315,5 +342,5 @@ const CreateTournament = () => {
     </div>
    );
 }
- 
+
 export default CreateTournament;
