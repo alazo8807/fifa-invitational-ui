@@ -11,6 +11,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3)
   },
   card: {
+    minWidth: 400,
     maxWidth: 500,
   },
   teamText: {
@@ -42,11 +43,13 @@ const useStyles = makeStyles((theme) => ({
 const TournamentDashboard = (props) => {
   const classes = useStyles(); 
   const appContext = useContext(AppContext);
+  const { tournaments } = appContext;
   const [tournament, setTournament] = useState({});
+  const [scoreA, setScoreA] = useState('');
+  const [scoreB, setScoreB] = useState('');
 
   useEffect(()=>{
     const tournamentId = props.match.params.id;
-    const { tournaments } = appContext;
   
     let tournament = tournaments.find(t => t.id === tournamentId);
 
@@ -60,8 +63,8 @@ const TournamentDashboard = (props) => {
         matches: [
           {
             id: "doli2w",
-            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: 0},
-            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goasl: 0}
+            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: ''},
+            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: ''}
 
           }
         ],
@@ -75,7 +78,28 @@ const TournamentDashboard = (props) => {
     setTournament(tournament);
   },[]);
 
-  console.log(tournament);
+  const handleScoreChange = (event, matchId, player) => {
+    let newScore = event.target.value;
+
+    const tournamentCopy = {...tournament};
+    const match = tournamentCopy.matches.find(m => m.id === matchId);
+    if (!match) return;
+
+    const index = tournamentCopy.matches.indexOf(match);
+    if (index < 0) return;
+
+    // Validate is an integer number. If it is not, update input value to prev value.
+    if (isNaN(newScore) || (newScore.length > 0 && newScore[newScore.length-1] === '.')) {
+      newScore = tournamentCopy.matches[index][player].goals;
+      player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
+      return;
+    }
+    
+    // It's a valid integer, update the new value.
+    player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
+    tournamentCopy.matches[index][player].goals = newScore;
+    appContext.onUpdateTournament(tournamentCopy);
+  }
   
   return ( 
     <div className={classes.root}>
@@ -85,7 +109,7 @@ const TournamentDashboard = (props) => {
             <Card id={match.id} className={classes.card}>
               <CardContent className={classes.matchWrapper}>
                 <Grid container spacing={1}>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <div className={classes.TeamWrapper}>
                       <div className={classes.teamText}>
                         <Typography variant="h6" component="h1">{match.playerA.team}</Typography>
@@ -93,14 +117,15 @@ const TournamentDashboard = (props) => {
                       </div>
                     </div>
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <div className={classes.scoreWrapper}>
-                      <input type="text"></input>
+                      <input type="text" value={scoreA} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
                       <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                      <input type="text"></input>
+                      <input type="text" value={scoreB} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
+                      <p>{match.playerA.goals}</p>
                     </div>
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <div className={classes.TeamWrapper}>
                       <div className={classes.teamText}>
                         <Typography variant="h6" component="h1">{match.playerB.team}</Typography>
