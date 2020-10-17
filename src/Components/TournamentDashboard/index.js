@@ -1,145 +1,48 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import AppContext from '../../Context/appContext';
-import { Typography, Grid } from '@material-ui/core';
+import FixturesTab from './FixturesTab';
+import TableTab from './TableTab';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,
     margin: theme.spacing(3)
   },
-  card: {
-    minWidth: 400,
-    maxWidth: 500,
-  },
-  teamText: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  scoreWrapper: {
-    display: 'flex',
-    height: 30,
-    '& > input': {
-      width: 50,
-      fontSize: 24,
-      border: '1px solid #eceef0',
-      borderRadius: 5,
-      // borderStyle: 'none',
-      focusStyle: 'none',
-      textAlign: 'center',
-      fontWeight: 600,
-    },
-    '& > input:focus': {
-        outline: 'none !important'
-    },
-  },
-  scoreDivider: {
-    margin: '0 3px'
-  }
 }));
 
 const TournamentDashboard = (props) => {
   const classes = useStyles(); 
   const appContext = useContext(AppContext);
-  const { tournaments } = appContext;
-  const [tournament, setTournament] = useState({});
-  const [scoreA, setScoreA] = useState('');
-  const [scoreB, setScoreB] = useState('');
 
-  useEffect(()=>{
-    const tournamentId = props.match.params.id;
-  
-    let tournament = tournaments.find(t => t.id === tournamentId);
+  const [tabValue, setTabValue] = React.useState(1);
 
-    // temp just for testing
-    if (!tournament) {
-      tournament = {
-        id: "oqio5f",
-        name: "Test Tournament",
-        tournamentType: "league",
-        numberOfPlayers: 2,
-        matches: [
-          {
-            id: "doli2w",
-            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: ''},
-            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: ''}
-
-          }
-        ],
-        players: [
-          {id: "6sargm", name: "ale", team: "real"},
-          {id: "pweu", name: "roli", team: "barca"}
-        ],
-      }
-    }
-
-    setTournament(tournament);
-  },[]);
-
-  const handleScoreChange = (event, matchId, player) => {
-    let newScore = event.target.value;
-
-    const tournamentCopy = {...tournament};
-    const match = tournamentCopy.matches.find(m => m.id === matchId);
-    if (!match) return;
-
-    const index = tournamentCopy.matches.indexOf(match);
-    if (index < 0) return;
-
-    // Validate is an integer number. If it is not, update input value to prev value.
-    if (isNaN(newScore) || (newScore.length > 0 && newScore[newScore.length-1] === '.')) {
-      newScore = tournamentCopy.matches[index][player].goals;
-      player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
-      return;
-    }
-    
-    // It's a valid integer, update the new value.
-    player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
-    tournamentCopy.matches[index][player].goals = newScore;
-    appContext.onUpdateTournament(tournamentCopy);
-  }
+  const handleChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
   
   return ( 
-    <div className={classes.root}>
-      <Grid container spacing={1}>
-        {tournament.matches && tournament.matches.map(match => (
-          <Grid item xs={12}>
-            <Card id={match.id} className={classes.card}>
-              <CardContent className={classes.matchWrapper}>
-                <Grid container spacing={1}>
-                  <Grid item xs={4}>
-                    <div className={classes.TeamWrapper}>
-                      <div className={classes.teamText}>
-                        <Typography variant="h6" component="h1">{match.playerA.team}</Typography>
-                        <Typography variant="body1" component="p">{match.playerA.name}</Typography>
-                      </div>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div className={classes.scoreWrapper}>
-                      <input type="text" value={scoreA} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
-                      <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                      <input type="text" value={scoreB} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
-                      <p>{match.playerA.goals}</p>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div className={classes.TeamWrapper}>
-                      <div className={classes.teamText}>
-                        <Typography variant="h6" component="h1">{match.playerB.team}</Typography>
-                        <Typography variant="body1" component="p">{match.playerB.name}</Typography>
-                      </div>
-                    </div>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </div>
+    <>
+      <Paper square>
+        <Tabs
+          value={tabValue}
+          indicatorColor="primary"
+          textColor="primary"
+          onChange={handleChange}
+          aria-label="disabled tabs example"
+        >
+          <Tab label="Fixtures" />
+          <Tab label="Table" />
+        </Tabs>
+      </Paper>
+      <div className={classes.root}>
+        {tabValue === 0 && <FixturesTab {...props}></FixturesTab>}
+        {tabValue === 1 && <TableTab></TableTab>}
+      </div>
+    </>
    );
 }
  
