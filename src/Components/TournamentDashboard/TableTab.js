@@ -16,15 +16,6 @@ import Paper from '@material-ui/core/Paper';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
-function createData(name, points, played, wins, draws, losses, gf, ga, gd) {
-  return { name, points, played, wins, draws, losses, gf, ga, gd};
-}
-
-// const rows = [
-//   createData('Ale', 6, 2, 2, 0, 0, 3, 1, 2),
-//   createData('Roli', 0, 0, 0, 0, 0, 1, 3, -2),
-// ];
-
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -55,9 +46,9 @@ const headCells = [
   { id: 'name', numeric: false, disablePadding: false, label: 'Player' },
   { id: 'points', numeric: true, disablePadding: false, label: 'Points' },
   { id: 'played', numeric: true, disablePadding: false, label: 'Played' },
-  { id: 'win', numeric: true, disablePadding: false, label: 'Win' },
-  { id: 'draw', numeric: true, disablePadding: false, label: 'Draw' },
-  { id: 'lost', numeric: true, disablePadding: false, label: 'Lost' },
+  { id: 'wins', numeric: true, disablePadding: false, label: 'Win' },
+  { id: 'draws', numeric: true, disablePadding: false, label: 'Draw' },
+  { id: 'losses', numeric: true, disablePadding: false, label: 'Lost' },
   { id: 'gf', numeric: true, disablePadding: false, label: 'GF' },
   { id: 'ga', numeric: true, disablePadding: false, label: 'GA' },
   { id: 'gd', numeric: true, disablePadding: false, label: 'GD' },
@@ -65,7 +56,7 @@ const headCells = [
 ];
 
 function EnhancedTableHead(props) {
-  const { classes, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -175,13 +166,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function EnhancedTable(props) {
   const classes = useStyles();
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [order, setOrder] = React.useState('desc');
+  const [orderBy, setOrderBy] = React.useState('points');
   const [selected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  // const [rows, setRows] = useState([]);
+
   const { stats: rows } = props; 
   
   const handleRequestSort = (event, property) => {

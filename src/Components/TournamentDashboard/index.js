@@ -41,7 +41,6 @@ const TournamentDashboard = (props) => {
             id: "doli2w",
             playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: null},
             playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: null}
-
           }
         ],
         players: [
@@ -87,8 +86,28 @@ const TournamentDashboard = (props) => {
       const playerA = tournament.players.find(p => p.id === match.playerA.id);
       const playerB = tournament.players.find(p => p.id === match.playerB.id);
 
-      if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {};
-      if (!rowPlayers[playerB.id]) rowPlayers[playerB.id] = {};
+      if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {
+        name: '',
+        played: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+        points: 0,
+        gf: 0,
+        ga: 0,
+        gd: 0
+      };
+      if (!rowPlayers[playerB.id]) rowPlayers[playerB.id] = {
+        name: '',
+        played: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+        points: 0,
+        gf: 0,
+        ga: 0,
+        gd: 0
+      };
       
       rowPlayers[playerA.id].name = `${playerA.name}(${match.playerA.team})`;
       rowPlayers[playerB.id].name = `${playerB.name}(${match.playerB.team})`;
