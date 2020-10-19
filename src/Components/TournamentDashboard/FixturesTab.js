@@ -42,41 +42,10 @@ const useStyles = makeStyles((theme) => ({
 
 const FixturesTab = (props) => {
   const classes = useStyles(); 
-  const appContext = useContext(AppContext);
-  const { tournaments } = appContext;
-  const [tournament, setTournament] = useState({});
   const [scoreA, setScoreA] = useState('');
   const [scoreB, setScoreB] = useState('');
-
-  useEffect(()=>{
-    const tournamentId = props.match.params.id;
-  
-    let tournament = tournaments.find(t => t.id === tournamentId);
-
-    // temp just for testing
-    if (!tournament) {
-      tournament = {
-        id: "oqio5f",
-        name: "Test Tournament",
-        tournamentType: "league",
-        numberOfPlayers: 2,
-        matches: [
-          {
-            id: "doli2w",
-            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: ''},
-            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: ''}
-
-          }
-        ],
-        players: [
-          {id: "6sargm", name: "ale", team: "real"},
-          {id: "pweu", name: "roli", team: "barca"}
-        ],
-      }
-    }
-
-    setTournament(tournament);
-  },[]);
+  const appContext = useContext(AppContext);
+  const { tournament } = props;
 
   const handleScoreChange = (event, matchId, player) => {
     let newScore = event.target.value;
@@ -105,8 +74,8 @@ const FixturesTab = (props) => {
     <div className={classes.root}>
       <Grid container spacing={1}>
         {tournament.matches && tournament.matches.map(match => (
-          <Grid item xs={12}>
-            <Card id={match.id} className={classes.card}>
+          <Grid key={match.id} item xs={12}>
+            <Card className={classes.card}>
               <CardContent className={classes.matchWrapper}>
                 <Grid container spacing={1}>
                   <Grid item xs={4}>
@@ -119,10 +88,9 @@ const FixturesTab = (props) => {
                   </Grid>
                   <Grid item xs={4}>
                     <div className={classes.scoreWrapper}>
-                      <input type="text" value={scoreA} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
+                      <input type="text" value={match.playerA.goals || ''} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
                       <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                      <input type="text" value={scoreB} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
-                      <p>{match.playerA.goals}</p>
+                      <input type="text" value={match.playerB.goals || ''} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
                     </div>
                   </Grid>
                   <Grid item xs={4}>

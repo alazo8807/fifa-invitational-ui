@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -20,10 +20,10 @@ function createData(name, points, played, wins, draws, losses, gf, ga, gd) {
   return { name, points, played, wins, draws, losses, gf, ga, gd};
 }
 
-const rows = [
-  createData('Ale', 6, 2, 2, 0, 0, 3, 1, 2),
-  createData('Roli', 0, 0, 0, 0, 0, 1, 3, -2),
-];
+// const rows = [
+//   createData('Ale', 6, 2, 2, 0, 0, 3, 1, 2),
+//   createData('Roli', 0, 0, 0, 0, 0, 1, 3, -2),
+// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -65,7 +65,7 @@ const headCells = [
 ];
 
 function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -103,7 +103,6 @@ EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
@@ -174,7 +173,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function EnhancedTable() {
+export default function EnhancedTable(props) {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -182,7 +181,9 @@ export default function EnhancedTable() {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+  // const [rows, setRows] = useState([]);
+  const { stats: rows } = props; 
+  
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -241,14 +242,14 @@ export default function EnhancedTable() {
                       <TableCell component="th" id={labelId} scope="row" >
                         {row.name}
                       </TableCell>
-                      <TableCell align="right">{row.points}</TableCell>
-                      <TableCell align="right">{row.played}</TableCell>
-                      <TableCell align="right">{row.wins}</TableCell>
-                      <TableCell align="right">{row.draws}</TableCell>
-                      <TableCell align="right">{row.losses}</TableCell>
-                      <TableCell align="right">{row.gf}</TableCell>
-                      <TableCell align="right">{row.ga}</TableCell>
-                      <TableCell align="right">{row.gd}</TableCell>
+                      <TableCell align="right">{row.points || 0}</TableCell>
+                      <TableCell align="right">{row.played || 0}</TableCell>
+                      <TableCell align="right">{row.wins || 0}</TableCell>
+                      <TableCell align="right">{row.draws || 0}</TableCell>
+                      <TableCell align="right">{row.losses || 0}</TableCell>
+                      <TableCell align="right">{row.gf || 0}</TableCell>
+                      <TableCell align="right">{row.ga || 0}</TableCell>
+                      <TableCell align="right">{row.gd || 0}</TableCell>
                     </TableRow>
                   );
                 })}
