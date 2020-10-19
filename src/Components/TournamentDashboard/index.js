@@ -1,56 +1,32 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import AppContext from '../../Context/appContext';
-import { Typography, Grid } from '@material-ui/core';
+import FixturesTab from './FixturesTab';
+import TableTab from './TableTab';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,
     margin: theme.spacing(3)
   },
-  card: {
-    minWidth: 400,
-    maxWidth: 500,
-  },
-  teamText: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  scoreWrapper: {
-    display: 'flex',
-    height: 30,
-    '& > input': {
-      width: 50,
-      fontSize: 24,
-      border: '1px solid #eceef0',
-      borderRadius: 5,
-      // borderStyle: 'none',
-      focusStyle: 'none',
-      textAlign: 'center',
-      fontWeight: 600,
-    },
-    '& > input:focus': {
-        outline: 'none !important'
-    },
-  },
-  scoreDivider: {
-    margin: '0 3px'
-  }
 }));
 
 const TournamentDashboard = (props) => {
-  const classes = useStyles(); 
+  const classes = useStyles();
+  const [tournament, setTournament] = useState({});
+  const [stats, setStats] = useState([]);
+
   const appContext = useContext(AppContext);
   const { tournaments } = appContext;
-  const [tournament, setTournament] = useState({});
-  const [scoreA, setScoreA] = useState('');
-  const [scoreB, setScoreB] = useState('');
 
+  const [tabValue, setTabValue] = React.useState(0);
+
+  // Create a test tournament if none created yet. (Testing porpuse only)
   useEffect(()=>{
     const tournamentId = props.match.params.id;
-  
     let tournament = tournaments.find(t => t.id === tournamentId);
 
     // temp just for testing
@@ -63,8 +39,8 @@ const TournamentDashboard = (props) => {
         matches: [
           {
             id: "doli2w",
-            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: ''},
-            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: ''}
+            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: null},
+            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: null}
 
           }
         ],
@@ -73,73 +49,118 @@ const TournamentDashboard = (props) => {
           {id: "pweu", name: "roli", team: "barca"}
         ],
       }
-    }
 
-    setTournament(tournament);
-  },[]);
-
-  const handleScoreChange = (event, matchId, player) => {
-    let newScore = event.target.value;
-
-    const tournamentCopy = {...tournament};
-    const match = tournamentCopy.matches.find(m => m.id === matchId);
-    if (!match) return;
-
-    const index = tournamentCopy.matches.indexOf(match);
-    if (index < 0) return;
-
-    // Validate is an integer number. If it is not, update input value to prev value.
-    if (isNaN(newScore) || (newScore.length > 0 && newScore[newScore.length-1] === '.')) {
-      newScore = tournamentCopy.matches[index][player].goals;
-      player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
-      return;
     }
     
-    // It's a valid integer, update the new value.
-    player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
-    tournamentCopy.matches[index][player].goals = newScore;
-    appContext.onUpdateTournament(tournamentCopy);
+    setTournament(tournament);
+    appContext.onUpdateTournament(tournament);
+    
+    // Init stats
+    const newstats = initStats(tournament);
+    setStats(newstats);
+  },[]);
+
+  // Update tournament when tournaments are updated (TODO: Move to fixturestab)
+  useEffect(() => {
+    const tournamentId = props.match.params.id;
+    let tournament = tournaments.find(t => t.id === tournamentId);
+    
+    if (!tournament) return;
+    setTournament(tournament);
+
+  }, [appContext, props.match.params.id, tournaments])
+
+  // Calculate stats
+  useEffect(() => {    
+    if (!tournament) return;
+    const newstats = initStats(tournament);
+    setStats(newstats);
+  }, [tournament]);
+
+  const initStats = (tournament) => {
+    const stats = [];
+    const rowPlayers = {};
+    
+    if (!tournament.matches) return;
+
+    for (let match of tournament.matches) {
+      const playerA = tournament.players.find(p => p.id === match.playerA.id);
+      const playerB = tournament.players.find(p => p.id === match.playerB.id);
+
+      if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {};
+      if (!rowPlayers[playerB.id]) rowPlayers[playerB.id] = {};
+      
+      rowPlayers[playerA.id].name = `${playerA.name}(${match.playerA.team})`;
+      rowPlayers[playerB.id].name = `${playerB.name}(${match.playerB.team})`;
+
+      const playerAGoals = match.playerA.goals === '' ? null : match.playerA.goals;
+      const playerBGoals = match.playerB.goals === '' ? null : match.playerB.goals;
+      
+      // Match not played yet
+      if (playerAGoals === null || playerAGoals === undefined || playerBGoals === null || playerBGoals === undefined) {
+        continue;
+      }
+
+      rowPlayers[playerA.id].played = Number(rowPlayers[playerA.id].played || 0) + 1;
+      rowPlayers[playerB.id].played = Number(rowPlayers[playerB.id].played || 0) + 1;
+      rowPlayers[playerA.id].gf = playerAGoals;
+      rowPlayers[playerB.id].gf = playerBGoals;
+      rowPlayers[playerA.id].ga = Math.abs(Number((rowPlayers[playerA.id].ga || 0) - playerBGoals));
+      rowPlayers[playerB.id].ga = Math.abs(Number((rowPlayers[playerB.id].ga || 0) - playerAGoals));
+      rowPlayers[playerA.id].gd = rowPlayers[playerA.id].gf - rowPlayers[playerA.id].ga;
+      rowPlayers[playerB.id].gd = rowPlayers[playerB.id].gf - rowPlayers[playerB.id].ga;
+      
+      // PlayerA win
+      if (playerAGoals > playerBGoals) {
+        rowPlayers[playerA.id].wins = (rowPlayers[playerA.id].wins || 0) + 1;
+        rowPlayers[playerB.id].losses = (rowPlayers[playerB.id].losses || 0) + 1;
+        rowPlayers[playerA.id].points = (rowPlayers[playerA.id].points || 0) + 3;
+      }
+      // PlayerB win
+      else if (playerAGoals < playerBGoals) {
+        rowPlayers[playerB.id].wins = (rowPlayers[playerB.id].wins || 0) + 1;
+        rowPlayers[playerA.id].losses = (rowPlayers[playerA.id].losses || 0) + 1;
+        rowPlayers[playerB.id].points = (rowPlayers[playerB.id].points || 0) + 3;
+      }
+      // Draw
+      else if (playerAGoals === playerBGoals){
+        rowPlayers[playerA.id].draws = (rowPlayers[playerA.id].draws || 0) + 1;
+        rowPlayers[playerB.id].draws = (rowPlayers[playerB.id].draws || 0) + 1;
+        rowPlayers[playerA.id].points = (rowPlayers[playerA.id].points || 0) + 1;
+        rowPlayers[playerB.id].points = (rowPlayers[playerB.id].points || 0) + 1;
+      }
+    };
+
+    for (let values of Object.values(rowPlayers)) {
+      stats.push(values);
+    }
+
+    return stats;
   }
+
+  const handleChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
   
   return ( 
-    <div className={classes.root}>
-      <Grid container spacing={1}>
-        {tournament.matches && tournament.matches.map(match => (
-          <Grid item xs={12}>
-            <Card id={match.id} className={classes.card}>
-              <CardContent className={classes.matchWrapper}>
-                <Grid container spacing={1}>
-                  <Grid item xs={4}>
-                    <div className={classes.TeamWrapper}>
-                      <div className={classes.teamText}>
-                        <Typography variant="h6" component="h1">{match.playerA.team}</Typography>
-                        <Typography variant="body1" component="p">{match.playerA.name}</Typography>
-                      </div>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div className={classes.scoreWrapper}>
-                      <input type="text" value={scoreA} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
-                      <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                      <input type="text" value={scoreB} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
-                      <p>{match.playerA.goals}</p>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div className={classes.TeamWrapper}>
-                      <div className={classes.teamText}>
-                        <Typography variant="h6" component="h1">{match.playerB.team}</Typography>
-                        <Typography variant="body1" component="p">{match.playerB.name}</Typography>
-                      </div>
-                    </div>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </div>
+    <>
+      <Paper square>
+        <Tabs
+          value={tabValue}
+          indicatorColor="primary"
+          textColor="primary"
+          onChange={handleChange}
+          aria-label="disabled tabs example"
+        >
+          <Tab label="Fixtures" />
+          <Tab label="Table" />
+        </Tabs>
+      </Paper>
+      <div className={classes.root}>
+        {tabValue === 0 && <FixturesTab tournament={tournament} {...props} />}
+        {tabValue === 1 && <TableTab stats={stats} />}
+      </div>
+    </>
    );
 }
  
