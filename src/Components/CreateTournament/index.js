@@ -7,6 +7,7 @@ import Alert from '@material-ui/lab/Alert';
 import Joi from 'joi';
 import ErrorDialog from './ErrorDialog';
 import AppContext from '../../Context/appContext';
+import { saveTournament } from '../../Services/tournamentService';
 
 const TournamentTypes = [
   {
@@ -227,7 +228,7 @@ const CreateTournament = (props) => {
   /**
    * Handle submit (Create tournament clicked)
    */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errorsValidate = validate();
     if (errorsValidate) {
       setOpenErrorDialog(true);
@@ -248,15 +249,17 @@ const CreateTournament = (props) => {
     }
 
     const newTournament = {
-      id: Math.random().toString(36).substr(7),
       name,
       tournamentType,
       numberOfPlayers,
       players,
       matches
     }
-    appContext.onCreateTournament(newTournament);
-    props.history.push(`/tournamentDashboard/${newTournament.id}`)
+
+    const { data } = await saveTournament(newTournament);
+    newTournament._id = data._id;
+    
+    props.history.push(`/tournamentDashboard/${newTournament._id}`)
   }
 
   return ( 

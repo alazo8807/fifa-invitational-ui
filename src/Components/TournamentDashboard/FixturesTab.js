@@ -1,8 +1,7 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import AppContext from '../../Context/appContext';
 import { Typography, Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     '& > input:focus': {
         outline: 'none !important'
     },
+
   },
   scoreDivider: {
     margin: '0 3px'
@@ -42,9 +42,6 @@ const useStyles = makeStyles((theme) => ({
 
 const FixturesTab = (props) => {
   const classes = useStyles(); 
-  const [scoreA, setScoreA] = useState('');
-  const [scoreB, setScoreB] = useState('');
-  const appContext = useContext(AppContext);
   const { tournament } = props;
 
   const handleScoreChange = (event, matchId, player) => {
@@ -60,15 +57,16 @@ const FixturesTab = (props) => {
     // Validate is an integer number. If it is not, update input value to prev value.
     if (isNaN(newScore) || (newScore.length > 0 && newScore[newScore.length-1] === '.')) {
       newScore = tournamentCopy.matches[index][player].goals;
-      player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
       return;
     }
     
     // It's a valid integer, update the new value.
-    player === 'playerA' ? setScoreA(newScore) : setScoreB(newScore);
     tournamentCopy.matches[index][player].goals = newScore;
-    appContext.onUpdateTournament(tournamentCopy);
+    // TODO: Update match directly later, no need to update the whole tournament
+    props.onTournamentUpdate(tournamentCopy);
   }
+
+  if (!tournament || !tournament.matches) return null;
   
   return ( 
     <div className={classes.root}>
