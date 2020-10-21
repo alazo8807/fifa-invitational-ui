@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppContext from '../../Context/appContext';
 import FixturesTab from './FixturesTab';
 import TableTab from './TableTab';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import { getTournament, saveTournament } from '../../Services/tournamentService';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,69 +18,41 @@ const TournamentDashboard = (props) => {
   const classes = useStyles();
   const [tournament, setTournament] = useState({});
   const [stats, setStats] = useState([]);
-
-  const appContext = useContext(AppContext);
-  const { tournaments } = appContext;
-
   const [tabValue, setTabValue] = React.useState(0);
 
   // Create a test tournament if none created yet. (Testing porpuse only)
   useEffect(()=>{
     const tournamentId = props.match.params.id;
-    let tournament = tournaments.find(t => t.id === tournamentId);
+    let tournament = null;
 
-    // temp just for testing
-    if (!tournament) {
-      tournament = {
-        id: "oqio5f",
-        name: "Test Tournament",
-        tournamentType: "league",
-        numberOfPlayers: 2,
-        matches: [
-          {
-            id: "doli2w",
-            playerA: {id: "6sargm", name: "ale", team: "Real Madrid", goals: null},
-            playerB: {id: "pweu", name: "roli", team: "Real Madrid B", goals: null}
-          }
-        ],
-        players: [
-          {id: "6sargm", name: "ale", team: "real"},
-          {id: "pweu", name: "roli", team: "barca"}
-        ],
-      }
-
+    const getTournamentFromDb = async () => {
+      const result = await getTournament(tournamentId);
+      tournament = result.data;
+      
+      setTournament(tournament);
+      
+      // Init stats
+      const newStats = calculateStats(tournament);
+      setStats(newStats);
+      
+      console.log(tournament);
     }
-    
-    setTournament(tournament);
-    appContext.onUpdateTournament(tournament);
-    
-    // Init stats
-    const newstats = initStats(tournament);
-    setStats(newstats);
+
+    getTournamentFromDb(); 
   },[]);
-
-  // Update tournament when tournaments are updated (TODO: Move to fixturestab)
-  useEffect(() => {
-    const tournamentId = props.match.params.id;
-    let tournament = tournaments.find(t => t.id === tournamentId);
-    
-    if (!tournament) return;
-    setTournament(tournament);
-
-  }, [appContext, props.match.params.id, tournaments])
 
   // Calculate stats
   useEffect(() => {    
     if (!tournament) return;
-    const newstats = initStats(tournament);
+    const newstats = calculateStats(tournament);
     setStats(newstats);
   }, [tournament]);
 
-  const initStats = (tournament) => {
+  const calculateStats = (tournament) => {
     const stats = [];
     const rowPlayers = {};
     
-    if (!tournament.matches) return;
+    if (!tournament || !tournament.matches) return;
 
     for (let match of tournament.matches) {
       const playerA = tournament.players.find(p => p.id === match.playerA.id);
@@ -160,6 +132,18 @@ const TournamentDashboard = (props) => {
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };
+
+  const handleTournamentUpdate = (tournament) => {
+    const saveTournamentInDb = async () => {
+      const result = await saveTournament(tournament);
+      tournament = result.data;
+      setTournament(tournament);
+      const newStats = calculateStats(tournament);
+      setStats(newStats);
+    }
+
+    saveTournamentInDb(); 
+  }
   
   return ( 
     <>
@@ -176,7 +160,10 @@ const TournamentDashboard = (props) => {
         </Tabs>
       </Paper>
       <div className={classes.root}>
-        {tabValue === 0 && <FixturesTab tournament={tournament} {...props} />}
+        {tabValue === 0 && <FixturesTab 
+          tournament={tournament}
+          onTournamentUpdate={handleTournamentUpdate} 
+          {...props} />}
         {tabValue === 1 && <TableTab stats={stats} />}
       </div>
     </>
