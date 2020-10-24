@@ -8,6 +8,7 @@ import Joi from 'joi';
 import ErrorDialog from './ErrorDialog';
 import AppContext from '../../Context/appContext';
 import { saveTournament } from '../../Services/tournamentService';
+import { saveMatch } from '../../Services/matchesService';
 
 const TournamentTypes = [
   {
@@ -239,12 +240,12 @@ const CreateTournament = (props) => {
     for (let i = 0; i < players.length; i++) {
       for (let j = i+1; j < players.length; j++){
         const match = {
-          id: Math.random().toString(36).substr(7),
           playerA: { ...players[i], goals: null },
-          playerB: { ...players[j], goasl: null }
+          playerB: { ...players[j], goals: null }
         }
 
-        matches.push(match);
+        const { data: newMatch } = await saveMatch(match);
+        matches.push({_id: newMatch._id});
       }
     }
 

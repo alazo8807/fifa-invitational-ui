@@ -1,11 +1,13 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FixturesTab from './FixturesTab';
 import TableTab from './TableTab';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { getTournament, saveTournament } from '../../Services/tournamentService';
+import { getTournament } from '../../Services/tournamentService';
+import { saveMatch } from '../../Services/matchesService';
+import calculateStats from '../../Utils/calculateStats';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +22,6 @@ const TournamentDashboard = (props) => {
   const [stats, setStats] = useState([]);
   const [tabValue, setTabValue] = React.useState(0);
 
-  // Create a test tournament if none created yet. (Testing porpuse only)
   useEffect(()=>{
     const tournamentId = props.match.params.id;
     let tournament = null;
@@ -30,15 +31,14 @@ const TournamentDashboard = (props) => {
       tournament = result.data;
       
       setTournament(tournament);
+      console.log(tournament);
       
       // Init stats
       const newStats = calculateStats(tournament);
       setStats(newStats);
-      
-      console.log(tournament);
     }
 
-    getTournamentFromDb(); 
+    getTournamentFromDb();
   },[]);
 
   // Calculate stats
@@ -48,101 +48,24 @@ const TournamentDashboard = (props) => {
     setStats(newstats);
   }, [tournament]);
 
-  const calculateStats = (tournament) => {
-    const stats = [];
-    const rowPlayers = {};
-    
-    if (!tournament || !tournament.matches) return;
-
-    for (let match of tournament.matches) {
-      const playerA = tournament.players.find(p => p.id === match.playerA.id);
-      const playerB = tournament.players.find(p => p.id === match.playerB.id);
-
-      if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {
-        name: '',
-        played: 0,
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        points: 0,
-        gf: 0,
-        ga: 0,
-        gd: 0
-      };
-      if (!rowPlayers[playerB.id]) rowPlayers[playerB.id] = {
-        name: '',
-        played: 0,
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        points: 0,
-        gf: 0,
-        ga: 0,
-        gd: 0
-      };
-      
-      rowPlayers[playerA.id].name = `${playerA.name}(${match.playerA.team})`;
-      rowPlayers[playerB.id].name = `${playerB.name}(${match.playerB.team})`;
-
-      const playerAGoals = match.playerA.goals === '' ? null : match.playerA.goals;
-      const playerBGoals = match.playerB.goals === '' ? null : match.playerB.goals;
-      
-      // Match not played yet
-      if (playerAGoals === null || playerAGoals === undefined || playerBGoals === null || playerBGoals === undefined) {
-        continue;
-      }
-
-      rowPlayers[playerA.id].played = Number(rowPlayers[playerA.id].played || 0) + 1;
-      rowPlayers[playerB.id].played = Number(rowPlayers[playerB.id].played || 0) + 1;
-      rowPlayers[playerA.id].gf = playerAGoals;
-      rowPlayers[playerB.id].gf = playerBGoals;
-      rowPlayers[playerA.id].ga = Math.abs(Number((rowPlayers[playerA.id].ga || 0) - playerBGoals));
-      rowPlayers[playerB.id].ga = Math.abs(Number((rowPlayers[playerB.id].ga || 0) - playerAGoals));
-      rowPlayers[playerA.id].gd = rowPlayers[playerA.id].gf - rowPlayers[playerA.id].ga;
-      rowPlayers[playerB.id].gd = rowPlayers[playerB.id].gf - rowPlayers[playerB.id].ga;
-      
-      // PlayerA win
-      if (playerAGoals > playerBGoals) {
-        rowPlayers[playerA.id].wins = (rowPlayers[playerA.id].wins || 0) + 1;
-        rowPlayers[playerB.id].losses = (rowPlayers[playerB.id].losses || 0) + 1;
-        rowPlayers[playerA.id].points = (rowPlayers[playerA.id].points || 0) + 3;
-      }
-      // PlayerB win
-      else if (playerAGoals < playerBGoals) {
-        rowPlayers[playerB.id].wins = (rowPlayers[playerB.id].wins || 0) + 1;
-        rowPlayers[playerA.id].losses = (rowPlayers[playerA.id].losses || 0) + 1;
-        rowPlayers[playerB.id].points = (rowPlayers[playerB.id].points || 0) + 3;
-      }
-      // Draw
-      else if (playerAGoals === playerBGoals){
-        rowPlayers[playerA.id].draws = (rowPlayers[playerA.id].draws || 0) + 1;
-        rowPlayers[playerB.id].draws = (rowPlayers[playerB.id].draws || 0) + 1;
-        rowPlayers[playerA.id].points = (rowPlayers[playerA.id].points || 0) + 1;
-        rowPlayers[playerB.id].points = (rowPlayers[playerB.id].points || 0) + 1;
-      }
-    };
-
-    for (let values of Object.values(rowPlayers)) {
-      stats.push(values);
-    }
-
-    return stats;
-  }
-
-  const handleChange = (event, newValue) => {
+  const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const handleTournamentUpdate = (tournament) => {
-    const saveTournamentInDb = async () => {
-      const result = await saveTournament(tournament);
-      tournament = result.data;
-      setTournament(tournament);
-      const newStats = calculateStats(tournament);
+  const handleMatchesUpdate = (matches) => {
+    const updateInDb = async () => {
+      for (let match of matches) {
+        await saveMatch(match);
+      }
+      const tournamentUpdated = {...tournament};
+      tournamentUpdated.matches = matches;
+      setTournament(tournamentUpdated);
+
+      const newStats = calculateStats(tournamentUpdated);
       setStats(newStats);
     }
 
-    saveTournamentInDb(); 
+    updateInDb(); 
   }
   
   return ( 
@@ -152,7 +75,7 @@ const TournamentDashboard = (props) => {
           value={tabValue}
           indicatorColor="primary"
           textColor="primary"
-          onChange={handleChange}
+          onChange={handleTabChange}
           aria-label="disabled tabs example"
         >
           <Tab label="Fixtures" />
@@ -162,7 +85,7 @@ const TournamentDashboard = (props) => {
       <div className={classes.root}>
         {tabValue === 0 && <FixturesTab 
           tournament={tournament}
-          onTournamentUpdate={handleTournamentUpdate} 
+          onMatchesUpdate={handleMatchesUpdate} 
           {...props} />}
         {tabValue === 1 && <TableTab stats={stats} />}
       </div>

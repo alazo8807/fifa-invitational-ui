@@ -48,7 +48,8 @@ const FixturesTab = (props) => {
     let newScore = event.target.value;
 
     const tournamentCopy = {...tournament};
-    const match = tournamentCopy.matches.find(m => m.id === matchId);
+    const match = tournamentCopy.matches.find(m => m._id === matchId);
+    
     if (!match) return;
 
     const index = tournamentCopy.matches.indexOf(match);
@@ -62,8 +63,7 @@ const FixturesTab = (props) => {
     
     // It's a valid integer, update the new value.
     tournamentCopy.matches[index][player].goals = newScore;
-    // TODO: Update match directly later, no need to update the whole tournament
-    props.onTournamentUpdate(tournamentCopy);
+    props.onMatchesUpdate(tournamentCopy.matches);
   }
 
   if (!tournament || !tournament.matches) return null;
@@ -72,7 +72,7 @@ const FixturesTab = (props) => {
     <div className={classes.root}>
       <Grid container spacing={1}>
         {tournament.matches && tournament.matches.map(match => (
-          <Grid key={match.id} item xs={12}>
+          <Grid key={match._id} item xs={12}>
             <Card className={classes.card}>
               <CardContent className={classes.matchWrapper}>
                 <Grid container spacing={1}>
@@ -86,9 +86,9 @@ const FixturesTab = (props) => {
                   </Grid>
                   <Grid item xs={4}>
                     <div className={classes.scoreWrapper}>
-                      <input type="text" value={match.playerA.goals || ''} onChange={(e) => handleScoreChange(e, match.id, 'playerA')}></input>
+                      <input type="text" value={match.playerA.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerA')}></input>
                       <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                      <input type="text" value={match.playerB.goals || ''} onChange={(e) => handleScoreChange(e, match.id, 'playerB')}></input>
+                      <input type="text" value={match.playerB.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerB')}></input>
                     </div>
                   </Grid>
                   <Grid item xs={4}>
