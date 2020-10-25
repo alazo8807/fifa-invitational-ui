@@ -6,6 +6,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Alert from '@material-ui/lab/Alert';
 import Joi from 'joi';
 import ErrorDialog from './ErrorDialog';
+import WheelDialog from './WheelDialog';
 import AppContext from '../../Context/appContext';
 import { saveTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
@@ -103,6 +104,7 @@ const CreateTournament = (props) => {
   const [players, setPlayers] = useState(PlayersData);
   const [errors, setErrors] = useState({});
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [openWheelDialog, setOpenWheelDialog] = useState(false);
 
   /**
    * Validate all required fields.
@@ -263,6 +265,13 @@ const CreateTournament = (props) => {
     props.history.push(`/tournamentDashboard/${newTournament._id}`)
   }
 
+  /**
+   * Handle wheel dialog
+   */
+  const handleOpenWheelDialog = () => {
+    setOpenWheelDialog(true);
+  }
+
   return ( 
     <div className={classes.root}>
       <div>
@@ -299,6 +308,9 @@ const CreateTournament = (props) => {
               value={numberOfPlayers}
               onChange={handleNumberOfPlayersChange}
             />
+          </div>
+          <div>
+            <Button onClick={handleOpenWheelDialog}>Pick Teams from Wheel</Button>
           </div>
           <div className={classes.playersTeamsForm}>
             {players.map((player) => (
@@ -343,6 +355,9 @@ const CreateTournament = (props) => {
       <ErrorDialog
         open={openErrorDialog}
         onCloseErrorDialog={() => setOpenErrorDialog(false)}/>
+      <WheelDialog
+        open={openWheelDialog}
+        onCloseDialog={() => setOpenWheelDialog(false)}/>
     </div>
    );
 }
