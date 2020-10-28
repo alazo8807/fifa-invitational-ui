@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     marginTop: theme.spacing(1),
-    // minHeight: 100,
   },
 }));
 
@@ -58,22 +57,33 @@ export default function NamesList({type, error, onNamesComplete}) {
   const [playersTeams, setPlayersTeams] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
 
+  /**
+   * Update Error message if any
+   */
   useEffect(()=>{    
     const showError = error.length > 0;
-    console.log("error", error);
-    
     setShowAlert(showError);
   }, [error])
 
+  /**
+   * Handle input loose focus
+   */
   const handleInputBlur = (event) => {
     const value = event.target.value;
   }
 
+  /**
+   * Handle input value changed 
+   * @param {Object} event 
+   */
   const handleNameChange = (event) => {
     const value = event.target.value;
     setCurrentName(value);
   }
 
+  /**
+   * Handle Add button clicked
+   */
   const handleAddName = (event) => {
     if (type === 'names') {
       setPlayersNames(players => [...players, currentName]);
@@ -85,6 +95,9 @@ export default function NamesList({type, error, onNamesComplete}) {
     setCurrentName('');
   }
 
+  /**
+   * Handle Next clicked
+   */
   const handleNextClick = () => {
     if (type === 'names') {
       onNamesComplete(playersNames);
@@ -92,6 +105,18 @@ export default function NamesList({type, error, onNamesComplete}) {
     }
 
     onNamesComplete(playersTeams)
+  }
+
+  /**
+   * Handle delete item from the list when remove btn clicked
+   */
+  const handleDelete = (value) => {
+    if (type === 'names') {
+      setPlayersNames(names => names.filter(p => p !== value));
+    }
+    else {
+      setPlayersTeams(teams => teams.filter(p => p !== value));
+    }
   }
 
   return (
@@ -148,7 +173,7 @@ export default function NamesList({type, error, onNamesComplete}) {
                 primary={name}
               />
               <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="delete">
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(name)}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
@@ -171,7 +196,7 @@ export default function NamesList({type, error, onNamesComplete}) {
                 primary={team}
               />
               <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="delete">
+                <IconButton edge="end" aria-label="delete" onClick={()=>handleDelete(team)}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
@@ -186,11 +211,6 @@ export default function NamesList({type, error, onNamesComplete}) {
           Next
         </Button>
       </DialogActions>
-      {/* <Snackbar open={showAlert}>
-        <Alert severity="error" onClose={()=>setShowAlert(false)}>
-        {error}
-        </Alert>
-      </Snackbar> */}
     </>
   );
 }
