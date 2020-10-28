@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -6,36 +7,61 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import WheelComponent from './WheelComponent';
+import NamesList from './NamesList';
+import Wheels from './Wheels';
 
-export default function WheelDialog({open, onCloseDialog}) {
+const useStyles = makeStyles((theme) => ({
+  root: {
+  }
+}));
+
+export default function WheelDialog({open, onCloseDialog, initialPlayers, onWheelPick}) {
+  const [showWheelComponent, setShowWheelComponent] = useState(false); 
+  const [players, setPlayers] = useState(initialPlayers);
+  const [listType, setListType] = useState('names');
+  const [namesList, setNamesList] = useState([]);
+  const [teamsList, setTeamsList] = useState([]);
+  const [namesError, setNamesError] = useState("");
+  const classes = useStyles();
+
   const handleClose = () => {
     onCloseDialog();
   };
 
-  const [segments, setSegments] =  useState(['Ale', 'Roli', 'Fernando', 'Erlan']);
-
-  const segColors = [
-    "#EE4040",
-    "#F0CF50",
-    "#815CD1",
-    "#3DA5E0",
-    "#34A24F",
-    "#F9AA1F",
-    "#EC3F3F",
-    "#FF9000",
-  ];
-
-  const onFinished = (winner) => {
-    console.log(winner);
-    // console.log('newSegments:', newSegments);
-    let newSegs = [];
-    setSegments(segs => {
-      newSegs = segs.filter(s => s !== winner);
-      return newSegs;
-    });
-
-    console.log(newSegs);
-    
+  const handleNamesComplete = (list) => {
+    switch (listType) {
+      case 'names':
+        if (list.length !== players.length) {
+          const diff = list.length - players.length;
+          console.log(diff);
+          
+          const operation = diff < 0 ? 'add' : 'remove';
+          const msg = `You need to ${operation} ${Math.abs(diff)} name(s)`;
+          setNamesError(new String(msg));
+          return;
+        }
+        setNamesError("");
+        setNamesList(list);
+        setListType('teams');
+        break;
+      case 'teams':
+        if (list.length !== players.length) {
+          const diff = list.length - players.length;
+          console.log(diff);
+          
+          const operation = diff < 0 ? 'add' : 'remove';
+          const msg = `You need to ${operation} ${Math.abs(diff)} teams(s)`;
+          console.log(msg);
+          
+          setNamesError(new String(msg));
+          return;
+        }
+        setTeamsList(list);
+        setShowWheelComponent(true);
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -46,26 +72,31 @@ export default function WheelDialog({open, onCloseDialog}) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Incomplete information"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Please enter all the required information first.
-          </DialogContentText>
-          
-          <WheelComponent
-            segments = {[...segments]}
-            segColors = {segColors}
-            // winningSegment ='won 10'
-            onFinished={(winner)=>onFinished(winner)}
-            primaryColor='black'
-            contrastColor='white'
-            buttonText='Spin'/>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary" autoFocus>
-            Ok
-          </Button>
-        </DialogActions>
+        {!showWheelComponent && (
+          <NamesList
+            type={listType}
+            error={namesError}
+            onNamesComplete={handleNamesComplete}
+          />
+        )}
+        {showWheelComponent && (
+          <>
+            <DialogTitle id="alert-dialog-title"></DialogTitle>
+            <DialogContent>
+              <Wheels 
+                // names={['ale', 'roli', 'erlan']} 
+                // teams={['real', 'barca', 'valencia']} 
+                names={namesList} 
+                teams={teamsList} 
+                onWheelPick={onWheelPick}></Wheels>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary" autoFocus>
+                Ok
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </div>
   );

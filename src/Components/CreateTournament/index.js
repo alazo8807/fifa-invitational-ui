@@ -222,7 +222,7 @@ const CreateTournament = (props) => {
       const updatedErrorMessage = errorMessage.replace(`${propertyName}`, `${label}`);
       errorsCopy[key] = updatedErrorMessage;
     } else {      
-      delete errorsCopy[key]; 
+      delete errorsCopy[key];
     }
 
     setErrors(errorsCopy);
@@ -272,6 +272,22 @@ const CreateTournament = (props) => {
     setOpenWheelDialog(true);
   }
 
+  /**
+   * Update a player with value received from Wheel component
+   */
+  const handleWheelPick = (value, type) => {
+    const playersCopy = [...players];
+    
+    for (let i = 0; i < playersCopy.length; i++) {
+      if (!playersCopy[i][type]) {
+        playersCopy[i][type] = value;
+        break;
+      }
+    }
+
+    setPlayers(playersCopy);
+  }
+
   return ( 
     <div className={classes.root}>
       <div>
@@ -310,7 +326,7 @@ const CreateTournament = (props) => {
             />
           </div>
           <div>
-            <Button onClick={handleOpenWheelDialog}>Pick Teams from Wheel</Button>
+            <Button onClick={handleOpenWheelDialog}>Use wheel of fortune</Button>
           </div>
           <div className={classes.playersTeamsForm}>
             {players.map((player) => (
@@ -322,6 +338,7 @@ const CreateTournament = (props) => {
                   type="search"
                   variant="filled"
                   error={errors[`playerName_${player.id}`] !== undefined}
+                  value={player.name}
                   onChange={(event) => handlePlayerNameChange(event, player.id)}
                   onBlur={(event) => handleBlur({ event, id: player.id, label: "Player name" })} />
                 <TextField
@@ -331,6 +348,7 @@ const CreateTournament = (props) => {
                   type="search"
                   variant="filled"
                   error={errors[`playerTeam_${player.id}`] !== undefined}
+                  value={player.team}
                   onChange={(event) => handlePlayerTeamChange(event, player.id)}
                   onBlur={(event) => handleBlur({ event, id: player.id, label: "Player team" })} />
               </div>
@@ -357,7 +375,11 @@ const CreateTournament = (props) => {
         onCloseErrorDialog={() => setOpenErrorDialog(false)}/>
       <WheelDialog
         open={openWheelDialog}
-        onCloseDialog={() => setOpenWheelDialog(false)}/>
+        onCloseDialog={() => setOpenWheelDialog(false)}
+        initialPlayers={players}
+        onWheelPick={handleWheelPick}
+        
+        />
     </div>
    );
 }

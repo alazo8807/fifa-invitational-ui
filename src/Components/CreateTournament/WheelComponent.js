@@ -24,15 +24,15 @@ import React, { useEffect, useState, useRef } from 'react'
   // const timerDelay = initialSegments.length
   let angleCurrent = 0
   let angleDelta = 0
-  const size = 290
+  const size = 160
   // let canvasContext = null
-  let maxSpeed = Math.PI / `${initialSegments.length}`
+  let maxSpeed = Math.PI / `${latestSegs.current.length}`
   // const upTime = initialSegments.length * 100
   // const downTime = initialSegments.length * 1000
   let spinStart = 0
   let frames = 0
-  const centerX = 300
-  const centerY = 300
+  const centerX = 250
+  const centerY = 200
 
   useEffect(()=>{
     latestSegs.current = initialSegments;
@@ -51,9 +51,9 @@ import React, { useEffect, useState, useRef } from 'react'
     console.log("segments received: ", initialSegments);
     setSegments(initialSegments);
 
-    setTimerDelay(initialSegments.length);
-    setUpTime(initialSegments.length * 100);
-    setDownTime(initialSegments.length * 100);
+    setTimerDelay(latestSegs.current.length);
+    setUpTime(latestSegs.current.length * 400);
+    setDownTime(latestSegs.current.length * 400);
 
   }, [initialSegments])
 
@@ -83,8 +83,8 @@ import React, { useEffect, useState, useRef } from 'react'
     let canvas = document.getElementById('canvas')
     if (navigator.appVersion.indexOf('MSIE') !== -1) {
       canvas = document.createElement('canvas')
-      canvas.setAttribute('width', 1000)
-      canvas.setAttribute('height', 600)
+      // canvas.setAttribute('width', 1000)
+      // canvas.setAttribute('height', 600)
       canvas.setAttribute('id', 'canvas')
       document.getElementById('wheel').appendChild(canvas)
     }
@@ -98,7 +98,7 @@ import React, { useEffect, useState, useRef } from 'react'
 
   const spin = (ctx) => {
     console.log('click: ', ctx);
-    
+    if (latestSegs.current.length <= 1) return;
     isStarted = true
     if (timerHandle === 0) {
       spinStart = new Date().getTime()
@@ -140,7 +140,7 @@ import React, { useEffect, useState, useRef } from 'react'
     angleCurrent += angleDelta
     while (angleCurrent >= Math.PI * 2) angleCurrent -= Math.PI * 2
     if (finished) {
-      // setFinished(true)
+      // setFinished(latestSegs.current.length === 0)
       onFinished(currentSegment)
       clearInterval(timerHandle)
       timerHandle = 0
@@ -161,7 +161,6 @@ import React, { useEffect, useState, useRef } from 'react'
   }
 
   const drawSegment = (ctx, key, lastAngle, angle) => {
-    // const ctx = canvasContext
     const value = latestSegs.current[key]
     ctx.save()
     ctx.beginPath()
@@ -182,7 +181,6 @@ import React, { useEffect, useState, useRef } from 'react'
   }
 
   const drawWheel = (ctx) => {
-    // const ctx = canvasContext
     let lastAngle = angleCurrent
     const len = latestSegs.current.length
     const PI2 = Math.PI * 2
@@ -222,7 +220,6 @@ import React, { useEffect, useState, useRef } from 'react'
   }
 
   const drawNeedle = (ctx) => {
-    // const ctx = canvasContext
     ctx.lineWidth = 1
     ctx.strokeStyle = contrastColor || 'white'
     ctx.fileStyle = contrastColor || 'white'
@@ -254,8 +251,8 @@ import React, { useEffect, useState, useRef } from 'react'
     <div id='wheel'>
       <canvas
         id='canvas'
-        width='1000'
-        height='800'
+        width='500'
+        height='380'
         style={{
           pointerEvents: isFinished ? 'none' : 'auto'
         }}
