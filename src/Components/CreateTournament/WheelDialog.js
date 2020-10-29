@@ -55,10 +55,13 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
    */
   const handleNamesComplete = (list) => {
     // TODO: Refactor bellow, logic is very similar, so put in a function.
+    const playersWithoutName = players.filter(p => p.name.length === 0);
+    const playersWithoutTeam = players.filter(p => p.team.length === 0);
+
     switch (listType) {
       case 'names':
-        if (list.length !== players.length) {
-          const diff = list.length - players.length;
+        if (list.length !== playersWithoutName.length) {
+          const diff = list.length - playersWithoutName.length;
           const operation = diff < 0 ? 'add' : 'remove';
           const msg = `You need to ${operation} ${Math.abs(diff)} name(s)`;
           setNamesError(new String(msg));
@@ -69,8 +72,8 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
         setListType('teams');
         break;
       case 'teams':
-        if (list.length !== players.length) {
-          const diff = list.length - players.length;
+        if (list.length !== playersWithoutTeam.length) {
+          const diff = list.length - playersWithoutTeam.length;
           const operation = diff < 0 ? 'add' : 'remove';
           const msg = `You need to ${operation} ${Math.abs(diff)} teams(s)`;
           
