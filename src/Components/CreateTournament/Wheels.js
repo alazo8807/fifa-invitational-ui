@@ -30,7 +30,7 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export default function Wheels({names: initialNames, teams: initialTeams, onWheelPick}) {
+export default function Wheels({names: initialNames, teams: initialTeams, onClose, onWheelPick}) {
   const classes = useStyles();
   const [nameSegments, setNameSegments] = useState(initialNames);
   const [teamSegments, setTeamSegments] = useState(initialTeams);

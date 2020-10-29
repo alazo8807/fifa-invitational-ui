@@ -50,7 +50,7 @@ function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export default function NamesList({type, error, onNamesComplete}) {
+export default function NamesList({type, error, onCancel, onBack, onNamesComplete}) {
   const classes = useStyles();
   const [currentName, setCurrentName] = useState('');
   const [playersNames, setPlayersNames] = useState([]);
@@ -84,7 +84,9 @@ export default function NamesList({type, error, onNamesComplete}) {
   /**
    * Handle Add button clicked
    */
-  const handleAddName = (event) => {
+  const handleAddName = () => {
+    setShowAlert(false);
+
     if (type === 'names') {
       setPlayersNames(players => [...players, currentName]);
     }
@@ -111,6 +113,8 @@ export default function NamesList({type, error, onNamesComplete}) {
    * Handle delete item from the list when remove btn clicked
    */
   const handleDelete = (value) => {
+    setShowAlert(false);
+
     if (type === 'names') {
       setPlayersNames(names => names.filter(p => p !== value));
     }
@@ -207,7 +211,15 @@ export default function NamesList({type, error, onNamesComplete}) {
       }
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleNextClick} color="primary">
+        <Button onClick={onCancel} color="primary">
+          Cancel
+        </Button>
+        {type === 'teams' && (
+          <Button onClick={onBack} color="primary">
+            Back
+          </Button>
+        )}
+        <Button onClick={handleNextClick} variant="contained" color="primary">
           Next
         </Button>
       </DialogActions>
