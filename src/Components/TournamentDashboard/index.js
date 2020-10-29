@@ -65,7 +65,7 @@ const TournamentDashboard = (props) => {
       setStats(newStats);
     }
 
-    updateInDb(); 
+    updateInDb();
   }
   
   return ( 

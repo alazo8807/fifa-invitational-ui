@@ -236,7 +236,7 @@ const CreateTournament = (props) => {
     if (errorMessage) {
       const updatedErrorMessage = errorMessage.replace(`${propertyName}`, `${label}`);
       errorsCopy[key] = updatedErrorMessage;
-    } else {      
+    } else {
       delete errorsCopy[key];
     }
 
@@ -296,6 +296,11 @@ const CreateTournament = (props) => {
     for (let i = 0; i < playersCopy.length; i++) {
       if (!playersCopy[i][type]) {
         playersCopy[i][type] = value;
+
+        // Remove validation error if there was any for that field
+        const errorType = type === 'name' ? 'playerName' : 'playerTeam';
+        delete errors[`${errorType}_${playersCopy[i].id}`];
+
         break;
       }
     }
