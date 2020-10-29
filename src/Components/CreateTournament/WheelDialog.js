@@ -24,6 +24,10 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
   const [namesError, setNamesError] = useState("");
   const classes = useStyles();
 
+  useEffect(()=>{
+    setPlayers(initialPlayers);
+  }, [initialPlayers])
+
   const handleClose = () => {
     onCloseDialog();
   };
