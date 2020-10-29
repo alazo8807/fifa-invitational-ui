@@ -54,7 +54,7 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
    * @param {Array} list 
    */
   const handleNamesComplete = (list) => {
-    // TODO: Refactor bellow, logic is very similar, so put in a function
+    // TODO: Refactor bellow, logic is very similar, so put in a function.
     switch (listType) {
       case 'names':
         if (list.length !== players.length) {
