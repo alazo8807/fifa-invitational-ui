@@ -17,6 +17,8 @@ import GroupIcon from '@material-ui/icons/Group';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Badge } from '@material-ui/core';
+import CardMenu from './CardMenu';
+import { deleteTournament } from '../../Services/tournamentService';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,17 +43,35 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function TournamentCard({data}) {
+export default function TournamentCard({data: initialData, onTournamentDeleted}) {
   const classes = useStyles();
+  const [data, setData] = useState(initialData);
   const [expanded, setExpanded] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
-  // useEffect(()=>{
+  useEffect(()=>{
+    setData(initialData);
+  }, [initialData])
 
-  // },[])
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
+  const handleMenuClick = (event) => {
+    setMenuAnchor(event.currentTarget);
   };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
+  const handleDuplicateClicked = () => {
+    handleMenuClose();
+  }
+
+  const handleDeleteClicked = async (id) => {
+    const result = await deleteTournament(id);
+    const deletedId = result.data._id;
+
+    handleMenuClose();
+    onTournamentDeleted(deletedId);
+  }
 
   const getTypeInitials = (type) => {
     switch (type) {
@@ -71,9 +91,15 @@ export default function TournamentCard({data}) {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
+          <>
+            <IconButton aria-label="settings" onClick={handleMenuClick}>
+              <MoreVertIcon />
+            </IconButton>
+            <CardMenu htmlEl={menuAnchor}
+              onClose={handleMenuClose}
+              onDuplicate={handleDuplicateClicked}
+              onDelete={()=>handleDeleteClicked(data._id)}/>
+          </>
         }
         title={data.name}
         subheader="September 14, 2016"

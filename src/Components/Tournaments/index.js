@@ -27,12 +27,17 @@ const TournamentsList = () => {
     getTournamentsFromDb();
   },[])
 
+  const handleTournamentDeleted = (deletedId) => {
+    const newTournaments = tournaments.filter(t => t._id !== deletedId);
+    setTournaments(newTournaments);
+  }
+
   return (
     <div className={classes.root}>
       <Grid container spacing={5} justify='center'>
         {tournaments.map(tournament => (
           <Grid item>
-            <TournamentCard data={tournament} />
+            <TournamentCard data={tournament} onTournamentDeleted={handleTournamentDeleted}/>
           </Grid>
         ))}
       </Grid>
