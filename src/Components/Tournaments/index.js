@@ -32,7 +32,7 @@ const TournamentsList = () => {
       <Grid container spacing={5} justify='center'>
         {tournaments.map(tournament => (
           <Grid item>
-            <TournamentCard></TournamentCard>
+            <TournamentCard data={tournament} />
           </Grid>
         ))}
       </Grid>
