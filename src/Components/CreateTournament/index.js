@@ -9,7 +9,7 @@ import FlipCameraAndroidIcon from '@material-ui/icons/FlipCameraAndroid';
 import ErrorDialog from './ErrorDialog';
 import WheelDialog from './WheelDialog';
 import AppContext from '../../Context/appContext';
-import { saveTournament } from '../../Services/tournamentService';
+import { saveTournament, getTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
 
 const TournamentTypes = [
@@ -107,6 +107,31 @@ const CreateTournament = (props) => {
   const [errors, setErrors] = useState({});
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [openWheelDialog, setOpenWheelDialog] = useState(false);
+
+  useEffect(()=>{
+    const tournamentId = props.match.params.id;
+    if (!tournamentId) return;
+
+    let tournamentInDb = null;
+    const populateData = () => {
+      console.log("tourney", tournamentInDb);
+      
+      setName(tournamentInDb.name);
+      setTournamentType(tournamentInDb.tournamentType);
+      setNumberOfPlayers(tournamentInDb.numberOfPlayers);
+      setPlayers(tournamentInDb.players.map(p => ({id: p.id, name: p.name, team: p.team})));
+    }
+
+    const cloneTournamentFromDb = async () => {
+      const result = await getTournament(tournamentId);
+      tournamentInDb = result.data;
+      if (!tournamentInDb) return;
+      populateData();
+    }
+
+    cloneTournamentFromDb();
+    
+  },[])
 
   /**
    * Determine if Wheel Dialog should be enabled or not.
@@ -248,6 +273,8 @@ const CreateTournament = (props) => {
    */
   const handleSubmit = async () => {
     const errorsValidate = validate();
+    console.log("errors", errorsValidate);
+    
     if (errorsValidate) {
       setOpenErrorDialog(true);
       return;
@@ -319,6 +346,7 @@ const CreateTournament = (props) => {
               name="name"
               variant="outlined" 
               helperText="Please enter a name for the tournament"
+              value={name}
               onChange={handleNameChanged}
               onBlur={(event) => handleBlur({ event, label: "Name" })}
               error={errors['name'] && errors['name'].length > 0}

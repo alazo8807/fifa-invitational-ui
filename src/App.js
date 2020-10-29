@@ -38,7 +38,7 @@ function App() {
       <div className="App">
         <Switch>
           <Route path="/Tournaments" component={TournamentsList}></Route>
-          <Route path="/createTournament" component={CreateTournament}></Route>
+          <Route path="/createTournament/:id?" component={CreateTournament}></Route>
           <Route path="/TournamentDashboard/:id" component={TournamentDashboard}></Route>
           <Route path="/" component={TournamentsList}></Route>
         </Switch>

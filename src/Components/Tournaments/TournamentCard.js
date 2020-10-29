@@ -43,15 +43,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function TournamentCard({data: initialData, onTournamentDeleted}) {
+export default function TournamentCard(props) {
   const classes = useStyles();
-  const [data, setData] = useState(initialData);
-  const [expanded, setExpanded] = useState(false);
+  const [data, setData] = useState(props.data);
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   useEffect(()=>{
-    setData(initialData);
-  }, [initialData])
+    setData(props.data);
+  }, [props.data])
 
   const handleMenuClick = (event) => {
     setMenuAnchor(event.currentTarget);
@@ -61,8 +60,9 @@ export default function TournamentCard({data: initialData, onTournamentDeleted})
     setMenuAnchor(null);
   };
 
-  const handleDuplicateClicked = () => {
+  const handleDuplicateClicked = (id) => {
     handleMenuClose();
+    props.history.push(`/createTournament/${id}`);
   }
 
   const handleDeleteClicked = async (id) => {
@@ -70,7 +70,7 @@ export default function TournamentCard({data: initialData, onTournamentDeleted})
     const deletedId = result.data._id;
 
     handleMenuClose();
-    onTournamentDeleted(deletedId);
+    props.onTournamentDeleted(deletedId);
   }
 
   const getTypeInitials = (type) => {
@@ -97,7 +97,7 @@ export default function TournamentCard({data: initialData, onTournamentDeleted})
             </IconButton>
             <CardMenu htmlEl={menuAnchor}
               onClose={handleMenuClose}
-              onDuplicate={handleDuplicateClicked}
+              onDuplicate={()=>handleDuplicateClicked(data._id)}
               onDelete={()=>handleDeleteClicked(data._id)}/>
           </>
         }
@@ -122,17 +122,6 @@ export default function TournamentCard({data: initialData, onTournamentDeleted})
           <ShareIcon />
         </IconButton>        
       </CardActions>
-      
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography body1>
-            Players: {data.numberOfPlayers}
-          </Typography>
-          <Typography body1>
-            Fixtures: {data.matches.length}
-          </Typography>
-        </CardContent>
-      </Collapse>
     </Card>
   );
 }

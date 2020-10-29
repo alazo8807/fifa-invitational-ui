@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TournamentsList = () => {
+const TournamentsList = (props) => {
   const classes = useStyles();
   const [tournaments, setTournaments] = useState([]);
 
@@ -37,7 +37,7 @@ const TournamentsList = () => {
       <Grid container spacing={5} justify='center'>
         {tournaments.map(tournament => (
           <Grid item>
-            <TournamentCard data={tournament} onTournamentDeleted={handleTournamentDeleted}/>
+            <TournamentCard data={tournament} onTournamentDeleted={handleTournamentDeleted} {...props}/>
           </Grid>
         ))}
       </Grid>
