@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import Joi from 'joi';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import Alert from '@material-ui/lab/Alert';
-import Joi from 'joi';
+import FlipCameraAndroidIcon from '@material-ui/icons/FlipCameraAndroid';
 import ErrorDialog from './ErrorDialog';
 import WheelDialog from './WheelDialog';
 import AppContext from '../../Context/appContext';
@@ -102,9 +103,23 @@ const CreateTournament = (props) => {
   const [tournamentType, setTournamentType] = useState('league');
   const [numberOfPlayers, setNumberOfPlayers] = useState(2);
   const [players, setPlayers] = useState(PlayersData);
+  const [disableWheelBtn, setDisableWheelBtn] = useState(false);
   const [errors, setErrors] = useState({});
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [openWheelDialog, setOpenWheelDialog] = useState(false);
+
+  /**
+   * Determine if Wheel Dialog should be enabled or not.
+   * If there are at least 2 players without name and at least 2 players without team
+   * then enable it.
+   */
+  useEffect(()=>{
+    const playersWithEmptyName = players.filter(p => p.name.length === 0);
+    const playersWithEmptyTeam = players.filter(p => p.team.length === 0);    
+    const shouldDisble = (playersWithEmptyName.length <= 1 || playersWithEmptyTeam.length <= 1);
+
+    setDisableWheelBtn(shouldDisble);
+  }, [players])
 
   /**
    * Validate all required fields.
@@ -326,7 +341,13 @@ const CreateTournament = (props) => {
             />
           </div>
           <div>
-            <Button onClick={handleOpenWheelDialog}>Use wheel of fortune</Button>
+            <Button 
+              disabled={disableWheelBtn} 
+              color="primary"
+              onClick={handleOpenWheelDialog}
+              startIcon={<FlipCameraAndroidIcon />}
+              >Use Wheel of names
+            </Button>
           </div>
           <div className={classes.playersTeamsForm}>
             {players.map((player) => (
