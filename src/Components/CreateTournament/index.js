@@ -378,7 +378,6 @@ const CreateTournament = (props) => {
         onCloseDialog={() => setOpenWheelDialog(false)}
         initialPlayers={players}
         onWheelPick={handleWheelPick}
-        
         />
     </div>
    );

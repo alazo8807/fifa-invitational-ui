@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import WheelComponent from './WheelComponent';
 import NamesList from './NamesList';
 import Wheels from './Wheels';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-  }
-}));
 
 export default function WheelDialog({open, onCloseDialog, initialPlayers, onWheelPick}) {
   const [showWheelComponent, setShowWheelComponent] = useState(false); 
@@ -22,19 +14,54 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
   const [namesList, setNamesList] = useState([]);
   const [teamsList, setTeamsList] = useState([]);
   const [namesError, setNamesError] = useState("");
-  const classes = useStyles();
+  
+  /**
+   * Update list of players when players were increased/decreased
+   */
+  useEffect(()=>{
+    setPlayers(initialPlayers);
+  }, [initialPlayers])
 
+  /**
+   * Reset values to default
+   */
+  const reset = () => {
+    setNamesList([]);
+    setTeamsList([]);
+    setListType('names');
+    setShowWheelComponent(false);
+    setNamesError("");
+  }
+
+  /**
+   * Handle Close event
+   */
   const handleClose = () => {
+    reset();
     onCloseDialog();
   };
 
+  /**
+   * Handle go back event
+   */
+  const handleBack = () => {
+    setNamesError("");
+    setListType('names');
+  }
+
+  /**
+   * Handle Next clicked. Save list of names received
+   * @param {Array} list 
+   */
   const handleNamesComplete = (list) => {
+    // TODO: Refactor bellow, logic is very similar, so put in a function.
+    const playersWithoutName = players.filter(p => p.name.length === 0);
+    const playersWithoutTeam = players.filter(p => p.team.length === 0);
+
     switch (listType) {
       case 'names':
-        if (list.length !== players.length) {
-          const diff = list.length - players.length;
-          console.log(diff);
-          
+        if (list.length !== playersWithoutName.length) {
+          const diff = list.length - playersWithoutName.length;
           const operation = diff < 0 ? 'add' : 'remove';
           const msg = `You need to ${operation} ${Math.abs(diff)} name(s)`;
           setNamesError(new String(msg));
@@ -45,13 +72,10 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
         setListType('teams');
         break;
       case 'teams':
-        if (list.length !== players.length) {
-          const diff = list.length - players.length;
-          console.log(diff);
-          
+        if (list.length !== playersWithoutTeam.length) {
+          const diff = list.length - playersWithoutTeam.length;
           const operation = diff < 0 ? 'add' : 'remove';
           const msg = `You need to ${operation} ${Math.abs(diff)} teams(s)`;
-          console.log(msg);
           
           setNamesError(new String(msg));
           return;
@@ -68,14 +92,18 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
     <div>
       <Dialog
         open={open}
-        onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        disableBackdropClick
+        disableEscapeKeyDown
       >
+        {/* TODO: Extract Dialog wrappers from NameList, just leave List logic inside NameList */}
         {!showWheelComponent && (
           <NamesList
             type={listType}
             error={namesError}
+            onCancel={handleClose}
+            onBack={handleBack}
             onNamesComplete={handleNamesComplete}
           />
         )}
@@ -84,15 +112,14 @@ export default function WheelDialog({open, onCloseDialog, initialPlayers, onWhee
             <DialogTitle id="alert-dialog-title"></DialogTitle>
             <DialogContent>
               <Wheels 
-                // names={['ale', 'roli', 'erlan']} 
-                // teams={['real', 'barca', 'valencia']} 
                 names={namesList} 
-                teams={teamsList} 
+                teams={teamsList}
+                onClose={handleClose}
                 onWheelPick={onWheelPick}></Wheels>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose} color="primary" autoFocus>
-                Ok
+              <Button onClick={handleClose} variant="contained" color="primary" autoFocus>
+                Close
               </Button>
             </DialogActions>
           </>
