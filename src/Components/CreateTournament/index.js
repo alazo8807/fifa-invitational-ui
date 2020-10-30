@@ -108,14 +108,16 @@ const CreateTournament = (props) => {
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [openWheelDialog, setOpenWheelDialog] = useState(false);
 
+  /**
+   * If id passed in url, it means we need to clone that tournament.
+   * Try to get tournament from db, then populate page with data received.
+   */
   useEffect(()=>{
     const tournamentId = props.match.params.id;
     if (!tournamentId) return;
 
     let tournamentInDb = null;
-    const populateData = () => {
-      console.log("tourney", tournamentInDb);
-      
+    const populateData = () => {    
       setName(tournamentInDb.name);
       setTournamentType(tournamentInDb.tournamentType);
       setNumberOfPlayers(tournamentInDb.numberOfPlayers);
@@ -298,7 +300,8 @@ const CreateTournament = (props) => {
       tournamentType,
       numberOfPlayers,
       players,
-      matches
+      matches,
+      createdDate: new Date()
     }
 
     const { data } = await saveTournament(newTournament);
