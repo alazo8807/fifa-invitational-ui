@@ -34,7 +34,6 @@ const PlayersData = [
 
 const schema = {
   name: Joi.string()
-      .alphanum()
       .min(2)
       .max(20)
       .required(),
