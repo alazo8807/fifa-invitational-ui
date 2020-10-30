@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import './App.css';
+import TournamentsList from './Components/Tournaments';
 import CreateTournament from './Components/CreateTournament';
 import TournamentDashboard from './Components/TournamentDashboard';
 import AppContext from './Context/appContext';
@@ -36,9 +37,10 @@ function App() {
         onUpdateTournament: handleUpdateTournament}}>
       <div className="App">
         <Switch>
-          <Route path="/createTournament" component={CreateTournament}></Route>
+          <Route path="/Tournaments" component={TournamentsList}></Route>
+          <Route path="/createTournament/:id?" component={CreateTournament}></Route>
           <Route path="/TournamentDashboard/:id" component={TournamentDashboard}></Route>
-          <Route path="/" component={CreateTournament}></Route>
+          <Route path="/" component={TournamentsList}></Route>
         </Switch>
       </div>
     </AppContext.Provider>
