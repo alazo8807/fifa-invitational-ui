@@ -8,6 +8,7 @@ import Tab from '@material-ui/core/Tab';
 import { getTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
 import calculateStats from '../../Utils/calculateStats';
+import withNavBar from '../hoc/withNavBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,7 +32,7 @@ const TournamentDashboard = (props) => {
       tournament = result.data;
       
       setTournament(tournament);
-      console.log(tournament);
+      if (props.setDisplayName) props.setDisplayName(tournament.name);
       
       // Init stats
       const newStats = calculateStats(tournament);
@@ -92,5 +93,5 @@ const TournamentDashboard = (props) => {
     </>
    );
 }
- 
-export default TournamentDashboard;
+
+export default withNavBar(TournamentDashboard);

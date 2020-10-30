@@ -11,6 +11,7 @@ import WheelDialog from './WheelDialog';
 import AppContext from '../../Context/appContext';
 import { saveTournament, getTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
+import withNavBar from '../hoc/withNavBar';
 
 const TournamentTypes = [
   {
@@ -340,7 +341,6 @@ const CreateTournament = (props) => {
   return ( 
     <div className={classes.root}>
       <div>
-        <h1>Create Tournament</h1>
         <div className={classes.form}>
           <div className={classes.formInputGroup}>
             <TextField id="outlined-basic"
@@ -439,4 +439,5 @@ const CreateTournament = (props) => {
    );
 }
 
-export default CreateTournament;
+CreateTournament.displayName = 'Create Tournament';
+export default withNavBar(CreateTournament);
