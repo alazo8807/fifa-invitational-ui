@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TournamentCard from './TournamentCard';
 import { getTournaments } from '../../Services/tournamentService';
 import { Grid } from '@material-ui/core';
+import withNavBar from '../hoc/withNavBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,4 +46,5 @@ const TournamentsList = (props) => {
    );
 }
  
-export default TournamentsList;
+TournamentsList.displayName = 'My Tournaments';
+export default withNavBar(TournamentsList);
