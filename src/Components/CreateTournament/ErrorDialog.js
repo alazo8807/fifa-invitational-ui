@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-export default function ErrorDialog({open, onCloseErrorDialog}) {
+export default function ErrorDialog({open, error, onCloseErrorDialog}) {
   const handleClose = () => {
     onCloseErrorDialog();
   };
@@ -19,10 +19,10 @@ export default function ErrorDialog({open, onCloseErrorDialog}) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Incomplete information"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{error.title || ""}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Please enter all the required information first.
+            {error.msg || ""}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
