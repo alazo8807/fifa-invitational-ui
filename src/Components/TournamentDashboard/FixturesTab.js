@@ -66,18 +66,40 @@ const FixturesTab = (props) => {
     props.onMatchesUpdate(tournamentCopy.matches);
   }
 
+  const getPlayoffGroupedMatches = (matches) => {
+    let result = [];
+    // Get different rounds of playoff
+    const playoffMatches = matches.filter(m => (m.playoffRound && m.playoffRound.length > 0));
+    const playoffRounds = new Set();
+    for (let match of playoffMatches) {
+      if (playoffRounds.has(match.playoffRound)) continue;
+      playoffRounds.add(match.playoffRound);
+    }
+
+    // Group matches per round
+    for (let round of playoffRounds) {
+      const matchesInRound = matches.filter(m => m.playoffRound === round);
+      result.push({group: round, matches: matchesInRound});
+    }
+
+    return result;
+  }
+
   const getGroupedMatches = (tournamentType, numberOfGroups, matches) => {
     if (tournamentType === 'league') return [{matches}];
-    console.log('no', numberOfGroups);
     
     const result = [];
+
+    // Get group stage matches
     for (let i = 1; i <= numberOfGroups; i++) {
-      console.log('matches', matches);
       const matchesInGroup = matches.filter(m => m.group === Number(i));
       // ASCII code of A is 65. Convert i to corresponding group letter
-      console.log('matchesInGroup', matchesInGroup);
       result.push({group: `Group ${String.fromCharCode(64 + i)}`, matches: matchesInGroup});
     }
+
+    // Playoff rounds matches
+    const playoffMatches = getPlayoffGroupedMatches(matches);
+    result.push(...playoffMatches);
 
     console.log('result', result);
     

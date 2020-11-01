@@ -130,7 +130,7 @@ const EnhancedTableToolbar = (props) => {
       })}
     >
       <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-        Results
+        {props.title || 'Results'}
       </Typography>
     </Toolbar>
   );
@@ -201,7 +201,7 @@ export default function EnhancedTable(props) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar title={props.title} numSelected={selected.length} />
         <TableContainer>
           <Table
             className={classes.table}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FixturesTab from './FixturesTab';
-import TableTab from './TableTab';
+// import TableTab from './EnhancedTable';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -9,6 +9,7 @@ import { getTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
 import calculateStats from '../../Utils/calculateStats';
 import withNavBar from '../hoc/withNavBar';
+import StatsTab from './StatsTab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
 const TournamentDashboard = (props) => {
   const classes = useStyles();
   const [tournament, setTournament] = useState({});
-  const [stats, setStats] = useState([]);
   const [tabValue, setTabValue] = React.useState(0);
 
   useEffect(()=>{
@@ -34,21 +34,10 @@ const TournamentDashboard = (props) => {
       // Pass tournament name up to navbar to display on app bar.
       setTournament(tournament);
       if (props.setDisplayName) props.setDisplayName(tournament.name);
-      
-      // Init stats
-      const newStats = calculateStats(tournament);
-      setStats(newStats);
     }
 
     getTournamentFromDb();
   },[]);
-
-  // Calculate stats
-  useEffect(() => {    
-    if (!tournament) return;
-    const newstats = calculateStats(tournament);
-    setStats(newstats);
-  }, [tournament]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -62,9 +51,6 @@ const TournamentDashboard = (props) => {
       const tournamentUpdated = {...tournament};
       tournamentUpdated.matches = matches;
       setTournament(tournamentUpdated);
-
-      const newStats = calculateStats(tournamentUpdated);
-      setStats(newStats);
     }
 
     updateInDb();
@@ -89,7 +75,7 @@ const TournamentDashboard = (props) => {
           tournament={tournament}
           onMatchesUpdate={handleMatchesUpdate} 
           {...props} />}
-        {tabValue === 1 && <TableTab stats={stats} />}
+        {tabValue === 1 && <StatsTab tournament={tournament} />}
       </div>
     </>
    );

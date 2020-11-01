@@ -1,12 +1,12 @@
-const calculateStats = (tournament) => {
+const calculateStats = (players, matches) => {
   const stats = [];
   const rowPlayers = {};
   
-  if (!tournament || !tournament.matches) return;
+  if (!matches || !players) return;
 
-  for (let match of tournament.matches) {
-    const playerA = tournament.players.find(p => p.id === match.playerA.id);
-    const playerB = tournament.players.find(p => p.id === match.playerB.id);
+  for (let match of matches) {
+    const playerA = players.find(p => p.id === match.playerA.id);
+    const playerB = players.find(p => p.id === match.playerB.id);
 
     if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {
       name: '',

@@ -12,6 +12,7 @@ import AppContext from '../../Context/appContext';
 import { saveTournament, getTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
 import withNavBar from '../hoc/withNavBar';
+import { createPlayoffMatches } from '../../Utils/matchGenerator';
 
 const schema = {
   name: Joi.string()
@@ -462,7 +463,12 @@ const CreateTournament = (props) => {
     return true;
   }
 
-  const createMatches = async (players, group) => {
+  /**
+   * Create Array of matches por players param. It saves it in db as it creates it.
+   * @param {Array} players 
+   * @param {Number} group 
+   */
+  const createGroupMatches = async (players, group) => {
     const matches = [];
 
     for (let i = 0; i < players.length; i++) {
@@ -481,6 +487,19 @@ const CreateTournament = (props) => {
     return matches;
   }
 
+  const autoGeneratePlayers = () => {
+    const playersCopy = [...players];
+    let playerCount = 1;
+    for(let i=0; i<playersCopy.length; i++) {
+      playersCopy[i].name = `P${String.fromCharCode(64 + playersCopy[i].group)}${playerCount}`
+      playersCopy[i].team = `T${String.fromCharCode(64 + playersCopy[i].group)}${playerCount}`
+      playerCount++;
+      if (playerCount > numberOfPlayersPerGroup) playerCount = 1;
+    }
+
+    setPlayers(playersCopy);
+  }
+
   /**
    * Handle submit (Create tournament clicked)
    */
@@ -491,7 +510,7 @@ const CreateTournament = (props) => {
     if (tournamentType === 'league') {
       if (!validateBeforeSubmit()) return;
 
-      const matches = await createMatches(players, 1);
+      const matches = await createGroupMatches(players, 1);
 
       newTournament = {
         name,
@@ -510,9 +529,14 @@ const CreateTournament = (props) => {
       for (let groupIndex = 1; groupIndex <= numberOfGroups; groupIndex++) {
         const playersInGroup = players.filter(p => p.group === Number(groupIndex));
 
-        const newMatches = await createMatches(playersInGroup, groupIndex);
+        const newMatches = await createGroupMatches(playersInGroup, groupIndex);
         matches.push(...newMatches);
       }
+
+      const initialRound = PlayoffTypes.find(t => t.value===playoffType);
+      const playOffMatches = await createPlayoffMatches(initialRound, numberOfGroups, teamsAdvancingPerGroup);
+
+      matches.push(...playOffMatches);
 
       newTournament = {
         name,
@@ -665,6 +689,13 @@ const CreateTournament = (props) => {
               onClick={handleOpenWheelDialog}
               startIcon={<FlipCameraAndroidIcon />}
               >Use Wheel of names
+            </Button>
+            <Button 
+              disabled={disableWheelBtn} 
+              color="primary"
+              onClick={autoGeneratePlayers}
+              startIcon={<FlipCameraAndroidIcon />}
+              >Autogenerate
             </Button>
           </div>
           <div className={classes.playersTeamsContainer}>
