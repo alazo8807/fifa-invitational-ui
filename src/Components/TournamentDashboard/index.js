@@ -5,7 +5,7 @@ import FixturesTab from './FixturesTab';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { getTournament } from '../../Services/tournamentService';
+import { getTournament, saveTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
 import calculateStats from '../../Utils/calculateStats';
 import withNavBar from '../hoc/withNavBar';
@@ -48,12 +48,29 @@ const TournamentDashboard = (props) => {
       for (let match of matches) {
         await saveMatch(match);
       }
-      const tournamentUpdated = {...tournament};
-      tournamentUpdated.matches = matches;
-      setTournament(tournamentUpdated);
     }
+    const tournamentUpdated = {...tournament};
+    tournamentUpdated.matches = matches;
+    setTournament(tournamentUpdated);
 
     updateInDb();
+  }
+
+  const handleTournamentUpdate = async (tournamentUpdated) => {
+    const { data: tournamentSaved } = await saveTournament(tournamentUpdated);
+    
+    const tournamentId = tournamentSaved._id;
+    let tournament = null;
+
+    const getTournamentFromDb = async () => {
+      const result = await getTournament(tournamentId);
+      tournament = result.data;
+      
+      // Pass tournament name up to navbar to display on app bar.
+      setTournament(tournament);
+    }
+
+    getTournamentFromDb();
   }
   
   return ( 
@@ -73,7 +90,8 @@ const TournamentDashboard = (props) => {
       <div className={classes.root}>
         {tabValue === 0 && <FixturesTab 
           tournament={tournament}
-          onMatchesUpdate={handleMatchesUpdate} 
+          onMatchesUpdate={handleMatchesUpdate}
+          onTournamentUpdate={handleTournamentUpdate}
           {...props} />}
         {tabValue === 1 && <StatsTab tournament={tournament} />}
       </div>

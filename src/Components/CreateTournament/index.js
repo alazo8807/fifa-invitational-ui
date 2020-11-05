@@ -487,7 +487,7 @@ const CreateTournament = (props) => {
     return matches;
   }
 
-  const autoGeneratePlayers = () => {
+  const autoGeneratePlayers = (players) => {
     const playersCopy = [...players];
     let playerCount = 1;
     for(let i=0; i<playersCopy.length; i++) {
@@ -693,7 +693,7 @@ const CreateTournament = (props) => {
             <Button 
               disabled={disableWheelBtn} 
               color="primary"
-              onClick={autoGeneratePlayers}
+              onClick={()=>autoGeneratePlayers(players)}
               startIcon={<FlipCameraAndroidIcon />}
               >Autogenerate
             </Button>

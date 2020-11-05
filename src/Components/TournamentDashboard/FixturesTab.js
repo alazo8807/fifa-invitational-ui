@@ -1,8 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import { Typography, Grid } from '@material-ui/core';
+import calculateStats, { checkGroupPhaseMatchesFinished } from '../../Utils/calculateStats';
+import { createInitialPlayoffRoundMatches } from '../../Utils/matchGenerator';
+import { saveTournament } from '../../Services/tournamentService';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,8 +35,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '& > input:focus': {
         outline: 'none !important'
-    },
-
+    }
   },
   scoreDivider: {
     margin: '0 3px'
@@ -42,7 +44,73 @@ const useStyles = makeStyles((theme) => ({
 
 const FixturesTab = (props) => {
   const classes = useStyles(); 
-  const { tournament } = props;
+  const [groupPhaseFinished, setGroupPhaseFinished] = useState(false);
+  const [tournament, setTournament] = useState(props.tournament);
+
+  /**
+   * Update tournament state variable when received new one
+   */
+  useEffect(()=>{
+    setTournament(props.tournament);
+    console.log('updating tt',props.tournament);
+    
+  }, [props.tournament])
+
+  // const [count, setCount] = useState(1);
+  //temp
+  useEffect(()=>{
+    if (!tournament || !tournament.matches) return;
+    if (!groupPhaseFinished) return; 
+
+    // if(count === 10) return;
+
+    const playoffMatchesExisting = tournament.matches.some(m => m.playoffRound && m.playoffRound.length > 0);
+    console.log('playoffMatchesExisting', playoffMatchesExisting);
+    
+    if (playoffMatchesExisting) return;
+    
+    const createAndSaveMatches = async () => {
+      
+      let stats = [];
+      for (let i = 1; i <= tournament.numberOfGroups; i++) {
+        const matchesInGroup = tournament.matches.filter(m => m.group === Number(i));
+        const groupStats = calculateStats(tournament.players, matchesInGroup);      
+        stats.push({group: Number(i), stats: groupStats});
+      }
+      
+      const { playoffType, numberOfGroups, teamsAdvancingPerGroup, players } = tournament;
+
+      const newMatches = await createInitialPlayoffRoundMatches(playoffType, numberOfGroups, teamsAdvancingPerGroup, players, stats);
+      console.log('newMatches', newMatches);
+      
+      const tournamentUpdate = {...tournament};
+      tournamentUpdate.matches = [...tournament.matches, ...newMatches];
+      props.onTournamentUpdate(tournamentUpdate);
+      // saveTournament(tournamentUpdate);
+      // setTournament(tournamentUpdate);
+
+      // setCount(count + 1);
+    }
+
+    createAndSaveMatches();
+  }, [groupPhaseFinished])
+
+  /**
+   * Check if all the matches for group stage have been played. 
+   * If so, then enable and update playoff match tiles.
+   */
+  const checkAndUpdatePlayoffs = () => {
+    const { matches, players, numberOfGroups, numberOfPlayersPerGroup } = tournament;
+
+    const matchesPlayedPerGroup = checkGroupPhaseMatchesFinished(players, matches, numberOfGroups, numberOfPlayersPerGroup);
+    
+    // If there are matches remaining for any group, don't do anything.
+    // TODO: We should unlock playoff matches as soon as we can, no need to wait for all matches to be finished.
+    const groupMatchesRemaining = matchesPlayedPerGroup.some(g => g.groupFinished === false);
+    if (groupMatchesRemaining) return;
+
+    setGroupPhaseFinished(true);
+  }
 
   const handleScoreChange = (event, matchId, player) => {
     let newScore = event.target.value;
@@ -63,13 +131,20 @@ const FixturesTab = (props) => {
     
     // It's a valid integer, update the new value.
     tournamentCopy.matches[index][player].goals = newScore;
+    // TODO: Keep a copy of matches in a state variable here to avoid delay when new score entered.
     props.onMatchesUpdate(tournamentCopy.matches);
+
+    // Check and populate playoff round matches information if possible
+    checkAndUpdatePlayoffs();
   }
 
   const getPlayoffGroupedMatches = (matches) => {
     let result = [];
     // Get different rounds of playoff
     const playoffMatches = matches.filter(m => (m.playoffRound && m.playoffRound.length > 0));
+
+    console.log('getPlayoffGroupedMatches', playoffMatches);
+    
     const playoffRounds = new Set();
     for (let match of playoffMatches) {
       if (playoffRounds.has(match.playoffRound)) continue;
@@ -85,7 +160,11 @@ const FixturesTab = (props) => {
     return result;
   }
 
-  const getGroupedMatches = (tournamentType, numberOfGroups, matches) => {
+  const getGroupedMatches = (updatedTournament) => {
+    const { tournamentType, numberOfGroups, matches } = updatedTournament;
+
+    console.log('checking updates', updatedTournament.matches);
+    
     if (tournamentType === 'league') return [{matches}];
     
     const result = [];
@@ -100,10 +179,19 @@ const FixturesTab = (props) => {
     // Playoff rounds matches
     const playoffMatches = getPlayoffGroupedMatches(matches);
     result.push(...playoffMatches);
-
-    console.log('result', result);
     
     return result;
+  }
+
+  /**
+   * Check if input field should be disabled or not.
+   * If input is of a playoff match and group phase matches are not finished, then disable.
+   */
+  const checkInputDisabled = (group) => {  
+    if (group >= 1 && group <= 8) return false;
+    if (groupPhaseFinished) return false;
+
+    return true;
   }
 
   if (!tournament || !tournament.matches) return null;
@@ -111,7 +199,7 @@ const FixturesTab = (props) => {
   return ( 
     <div className={classes.root}>
       <Grid container spacing={1}>
-          {getGroupedMatches(tournament.tournamentType, tournament.numberOfGroups, tournament.matches).map(obj => (
+          {getGroupedMatches(tournament).map(obj => (
             <>
             {obj.group && (
                 <div>
@@ -133,9 +221,9 @@ const FixturesTab = (props) => {
                       </Grid>
                       <Grid item xs={4}>
                         <div className={classes.scoreWrapper}>
-                          <input type="text" value={match.playerA.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerA')}></input>
+                          <input disabled={checkInputDisabled(match.group)} type="text" value={match.playerA.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerA')}></input>
                           <Typography variant="h5" component="h2"><span className={classes.scoreDivider}>-</span></Typography>
-                          <input type="text" value={match.playerB.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerB')}></input>
+                          <input disabled={checkInputDisabled(match.group)} type="text" value={match.playerB.goals || ''} onChange={(e) => handleScoreChange(e, match._id, 'playerB')}></input>
                         </div>
                       </Grid>
                       <Grid item xs={4}>

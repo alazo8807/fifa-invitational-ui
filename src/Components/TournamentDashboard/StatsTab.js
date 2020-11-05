@@ -7,7 +7,7 @@ const StatsTab = (props) => {
 
   const getGroupedStats = (players, matches, numberOfGroups) => {
     const stats = [];
-
+    
     for (let i = 1; i <= numberOfGroups; i++) {
       const matchesInGroup = matches.filter(m => m.group === Number(i));
       const groupStats = calculateStats(players, matchesInGroup);
@@ -25,11 +25,6 @@ const StatsTab = (props) => {
     <>
     {getGroupedStats(players, matches, numberOfGroups).map(obj => (
       <>
-      {/* {obj.group && (
-        <div>
-          <h1>{obj.group}</h1>
-        </div>
-      )} */}
       <EnhancedTable title={obj.group} stats={obj.stats} />
       </>
     ))}
