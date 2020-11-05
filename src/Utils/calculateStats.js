@@ -1,12 +1,17 @@
-const calculateStats = (tournament) => {
+/**
+ * Get Stats for each group and player.
+ * @param {Array} players 
+ * @param {Array} matches 
+ */
+const calculateStats = (players, matches) => {
   const stats = [];
   const rowPlayers = {};
   
-  if (!tournament || !tournament.matches) return;
+  if (!matches || !players) return;
 
-  for (let match of tournament.matches) {
-    const playerA = tournament.players.find(p => p.id === match.playerA.id);
-    const playerB = tournament.players.find(p => p.id === match.playerB.id);
+  for (let match of matches) {
+    const playerA = players.find(p => p.id === match.playerA.id);
+    const playerB = players.find(p => p.id === match.playerB.id);
 
     if (!rowPlayers[playerA.id]) rowPlayers[playerA.id] = {
       name: '',
@@ -72,11 +77,39 @@ const calculateStats = (tournament) => {
     }
   };
 
-  for (let values of Object.values(rowPlayers)) {
-    stats.push(values);
+  for (let key in rowPlayers) {
+    stats.push({playerId: key, ...rowPlayers[key]});
   }
+  // for (let values of Object.values(rowPlayers)) {
+  //   stats.push(values);
+  // }
+
+  console.log('stats', stats);
 
   return stats;
 }
+
+/**
+ * Get matches played for each group and check if all matches were played for each of them.
+ */
+export const checkGroupPhaseMatchesFinished = (players, matches, numberOfGroups, numberOfPlayersPerGroup) => {
+  const result = [];
+  for (let i = 1; i <= numberOfGroups; i++) {
+    const matchesInGroup = matches.filter(m => m.group === Number(i));
+    const groupStats = calculateStats(players, matchesInGroup);
+    console.log('groupStats', groupStats);
+    
+    const gamesPlayedInGroup = groupStats.map(el => el.played).reduce((acc,curr) => (acc + curr),0);
+
+    // Total number of matches to be played
+    const totalMatchesToBePlayed = numberOfPlayersPerGroup * (numberOfPlayersPerGroup - 1);
+    const groupFinished = (gamesPlayedInGroup === totalMatchesToBePlayed);
+
+    result.push({group: `Group ${String.fromCharCode(64 + i)}`, gamesPlayedInGroup: gamesPlayedInGroup, groupFinished});
+  }
+  
+  return result;
+}
+
 
 export default calculateStats;

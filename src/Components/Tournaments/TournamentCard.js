@@ -78,7 +78,9 @@ export default function TournamentCard(props) {
   const getTypeInitials = (type) => {
     switch (type) {
       case 'league':
-        return 'L'
+        return 'L';
+      case 'groupPlayoff':
+        return 'GP'
       default:
         break;
     }
@@ -112,8 +114,8 @@ export default function TournamentCard(props) {
       />
       <CardMedia
         className={classes.media}
-        image="/leagues.jpg"
-        title="League Tournament"
+        image={data.tournamentType === 'league' ? "/leagues.jpg" : "/cup.jpg"}
+        title={data.tournamentType === 'league' ? "League Tournament" : "Group and playoffs tournament"}
       />
       <CardActions className={classes.cardActions}>
         <div className={classes.badgeGroup}>
