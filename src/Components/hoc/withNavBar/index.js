@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,12 +9,14 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems, secondaryListItems } from './navItems';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import AppContext from '../../../Context/appContext';
 
 const drawerWidth = 240;
 
@@ -103,6 +105,11 @@ export default function withNavBar(Component) {
     const [open, setOpen] = React.useState(false);
     const [displayName, setDisplayName] = React.useState(null);
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const accountMenuOpen = Boolean(anchorEl);
+
+    const appContext = useContext(AppContext);
+
     const handleDrawerOpen = () => {
       setOpen(true);
     };
@@ -110,6 +117,28 @@ export default function withNavBar(Component) {
     const handleDrawerClose = () => {
       setOpen(false);
     };
+
+    const handleLogInClicked = () => {
+      props.history.push("/signin");
+    }
+
+    const handleCreateAccountClicked = () => {
+      props.history.push("/signup");
+    }
+
+    const handleLogoutClicked = () => {
+      localStorage.removeItem("token");
+      window.location = "/signin";
+    }
+
+    const handleMenu = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+  
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
 
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   
@@ -129,11 +158,42 @@ export default function withNavBar(Component) {
             <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
               {displayName || Component.displayName || ""}
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={accountMenuOpen}
+                onClose={handleClose}
+              >
+                {!appContext.user &&
+                  <>
+                    <MenuItem onClick={handleLogInClicked}>Log in</MenuItem>
+                    <MenuItem onClick={handleCreateAccountClicked}>Create account</MenuItem>
+                  </>
+                }
+                {appContext.user &&
+                  <>
+                    <MenuItem onClick={handleLogoutClicked}>Logout</MenuItem>
+                  </>
+                }
+              </Menu>
           </Toolbar>
         </AppBar>
         <Drawer

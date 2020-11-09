@@ -3,11 +3,21 @@ import './App.css';
 import TournamentsList from './Components/Tournaments';
 import CreateTournament from './Components/CreateTournament';
 import TournamentDashboard from './Components/TournamentDashboard';
+import ProtectedRoute from './Components/common/ProtectedRoute';
 import AppContext from './Context/appContext';
 import { Route, Switch } from 'react-router-dom';
+import SignInSide from './Components/SignIn/index';
+import SignUpSide from './Components/SignUp/index';
+import { getCurrentUser } from './Services/authService';
 
 function App() {
   const [tournaments, setTournaments] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(()=>{
+    const user = getCurrentUser();
+    setUser(user);
+  }, [])
 
   const handleUpdateTournament = (tournament) => {
     const newTournaments = [...tournaments];
@@ -33,14 +43,17 @@ function App() {
     <AppContext.Provider 
       value={
         {tournaments,
+        user,
         onCreateTournament: createTournamentHandle,
         onUpdateTournament: handleUpdateTournament}}>
       <div className="App">
         <Switch>
-          <Route path="/Tournaments" component={TournamentsList}></Route>
-          <Route path="/createTournament/:id?" component={CreateTournament}></Route>
+          <ProtectedRoute path="/Tournaments" component={TournamentsList}></ProtectedRoute>
+          <ProtectedRoute path="/createTournament/:id?" component={CreateTournament}></ProtectedRoute>
           <Route path="/TournamentDashboard/:id" component={TournamentDashboard}></Route>
-          <Route path="/" component={TournamentsList}></Route>
+          <Route path="/SignIn" component={SignInSide}></Route>
+          <Route path="/SignUp" component={SignUpSide}></Route>
+          <ProtectedRoute path="/" component={TournamentsList}></ProtectedRoute>
         </Switch>
       </div>
     </AppContext.Provider>
