@@ -7,7 +7,9 @@ function tournamentUrl(id) {
   return `${apiEndpoint}/${id}`;
 }
 
-export function getTournaments() {
+export function getTournaments(useCurrentUser=false) {
+  if (useCurrentUser) return http.get(`${apiEndpoint}/me`);
+  
   return http.get(apiEndpoint);
 }
 
