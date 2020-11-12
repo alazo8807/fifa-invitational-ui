@@ -5,8 +5,6 @@ import { apiUrl } from "../config.json";
 const apiEndpoint = apiUrl + "/auth";
 const tokenKey = "token";
 
-console.log("http: ", http);
-
 http.setJwt(getJwt());
 
 export async function login(email, password) {

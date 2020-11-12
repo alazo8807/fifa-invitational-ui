@@ -18,7 +18,7 @@ const TournamentsList = (props) => {
 
   useEffect(()=>{
     const getTournamentsFromDb = async () => {
-      const result = await getTournaments();
+      const result = await getTournaments(true);
       const tournaments = result.data;
       
       setTournaments(tournaments);

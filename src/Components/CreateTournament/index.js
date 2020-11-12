@@ -518,6 +518,7 @@ const CreateTournament = (props) => {
         numberOfPlayers,
         players,
         matches,
+        createdBy: appContext.user._id,
         createdDate: new Date()
       }
     } else if (tournamentType === 'groupPlayoff') {  
@@ -547,6 +548,7 @@ const CreateTournament = (props) => {
         playoffType,
         players,
         matches,
+        createdBy: appContext.user._id,
         createdDate: new Date()
       }
     }
