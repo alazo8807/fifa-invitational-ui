@@ -638,7 +638,7 @@ const CreateTournament = (props) => {
             </TextField>
             {tournamentType === 'league' &&
               <TextField id="outlined-basic"
-              label="Number of groups" 
+              label="Number of players"
               variant="outlined"
               type="number"
               value={numberOfPlayers}
