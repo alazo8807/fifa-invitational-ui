@@ -43,12 +43,9 @@ import React, { useEffect, useState, useRef } from 'react'
     setTimeout(() => {
       window.scrollTo(0, 1)
     }, 0);
-
-    
   }, [])
 
   useEffect(()=> {
-    console.log("segments received: ", initialSegments);
     setSegments(initialSegments);
 
     setTimerDelay(latestSegs.current.length);
@@ -59,8 +56,6 @@ import React, { useEffect, useState, useRef } from 'react'
 
   useEffect(()=>{
     if (!segments.length) return;
-    console.log("updating segments: ",segments );
-
     if (!canvasInit) {
       const newCanvasContext = initCanvas();
       setCanvasContext(newCanvasContext);
@@ -77,9 +72,7 @@ import React, { useEffect, useState, useRef } from 'react'
     wheelDraw(newCanvasContext)
   }
 
-  const initCanvas = () => {
-    console.log("init canvas");
-    
+  const initCanvas = () => {  
     let canvas = document.getElementById('canvas')
     if (navigator.appVersion.indexOf('MSIE') !== -1) {
       canvas = document.createElement('canvas')
@@ -91,13 +84,11 @@ import React, { useEffect, useState, useRef } from 'react'
 
     const ctx = canvas.getContext('2d');
     canvas.addEventListener('click', () => spin(ctx), true)
-    console.log('init done');
     return ctx;
     
   }
 
   const spin = (ctx) => {
-    console.log('click: ', ctx);
     if (latestSegs.current.length <= 1) return;
     isStarted = true
     if (timerHandle === 0) {
