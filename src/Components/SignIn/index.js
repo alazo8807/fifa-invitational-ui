@@ -68,16 +68,23 @@ export default function SignInSide(props) {
   };
 
   /**
-   * Handle Email changed
+   * Handle Email changed. If there is an error received from the server, remove it.
+   * TODO: Create a function for emailChanged and passwordChanged, they are almost the same.
    */
   const handleEmailChanged = (event) => {
+    const errorsUpdate = {...errors};
+    delete errorsUpdate['server'];
+    setErrors(errorsUpdate);
     setEmail(event.target.value);
   };
 
   /**
-   * Handle Password changed
+   * Handle Password changed. If there is an error received from the server, remove it.
    */
   const handlePasswordChanged = (event) => {
+    const errorsUpdate = {...errors};
+    delete errorsUpdate['server'];
+    setErrors(errorsUpdate);
     setPassword(event.target.value);
   };
 
@@ -114,7 +121,7 @@ export default function SignInSide(props) {
       window.location = '/';
     } catch (ex) {
       if (ex.response.status && ex.response.status === 400) {
-        setErrors(errors => errors = {...errors, email: ex.response.data});
+        setErrors(errors => errors = {...errors, server: ex.response.data});
       }
     }
   }
@@ -146,8 +153,8 @@ export default function SignInSide(props) {
               label="Email Address"
               name="email"
               autoComplete="email"
-              error={errors['email'] && errors['email'].length > 0}
-              helperText={errors['email']}
+              error={(errors['email'] && errors['email'].length > 0) || (errors['server'] && errors['server'].length > 0)}
+              helperText={errors['email'] || errors['server']}
             />
             <TextField
               variant="outlined"
@@ -186,7 +193,7 @@ export default function SignInSide(props) {
                 </Link>
               </Grid> */}
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/signup" variant="body2">
                   {"Don't have an account yet? Sign up"}
                 </Link>
               </Grid>
