@@ -135,7 +135,7 @@ const CreateTournament = (props) => {
   const appContext = useContext(AppContext);
 
   const [name, setName] = useState('');
-  const [tournamentType, setTournamentType] = useState('groupPlayoff');
+  const [tournamentType, setTournamentType] = useState('league');
   const [numberOfPlayers, setNumberOfPlayers] = useState(2);
   const [numberOfGroups, setNumberOfGroups] = useState(1);
   const [numberOfPlayersPerGroup, setNumberOfPlayersPerGroup] = useState(2);
@@ -498,7 +498,7 @@ const CreateTournament = (props) => {
       playersCopy[i].name = `P${String.fromCharCode(64 + playersCopy[i].group)}${playerCount}`
       playersCopy[i].team = `T${String.fromCharCode(64 + playersCopy[i].group)}${playerCount}`
       playerCount++;
-      if (playerCount > numberOfPlayersPerGroup) playerCount = 1;
+      if (tournamentType !== 'league' && playerCount > numberOfPlayersPerGroup) playerCount = 1;
     }
 
     setPlayers(playersCopy);
