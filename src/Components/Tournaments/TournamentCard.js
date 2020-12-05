@@ -91,7 +91,7 @@ export default function TournamentCard(props) {
 
     let numberOfPlayers = 0;
     if (tournamentType === 'league') {
-      numberOfPlayers =  data.getNumberOfPlayers;
+      numberOfPlayers =  data.numberOfPlayers;
     }
     else if (tournamentType === 'groupPlayoff') {
       numberOfPlayers =  data.numberOfGroups * data.numberOfPlayersPerGroup;
