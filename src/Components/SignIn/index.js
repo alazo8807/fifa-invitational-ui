@@ -120,6 +120,8 @@ export default function SignInSide(props) {
       const result = await login(email, password);
       window.location = '/';
     } catch (ex) {
+      console.log(ex);
+      
       if (ex.response.status && ex.response.status === 400) {
         setErrors(errors => errors = {...errors, server: ex.response.data});
       }

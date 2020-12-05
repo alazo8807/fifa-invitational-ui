@@ -1,13 +1,14 @@
 import jwtDecode from "jwt-decode";
 import http from "./httpService";
-import { apiUrl } from "../config.json";
 
-const apiEndpoint = apiUrl + "/auth";
+const apiEndpoint = "/auth";
 const tokenKey = "token";
 
 http.setJwt(getJwt());
 
 export async function login(email, password) {
+  console.log("api is, ", process.env.REACT_APP_API_URL);
+  
   const { data: jwt } = await http.post(apiEndpoint, { email, password });
   localStorage.setItem(tokenKey, jwt);
 }
