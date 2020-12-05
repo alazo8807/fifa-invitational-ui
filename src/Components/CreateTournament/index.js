@@ -162,6 +162,10 @@ const CreateTournament = (props) => {
       setTournamentType(tournamentInDb.tournamentType);
       setNumberOfPlayers(tournamentInDb.numberOfPlayers);
       setPlayers(tournamentInDb.players.map(p => ({id: p.id, name: p.name, team: p.team, group: p.group})));
+      setNumberOfGroups(tournamentInDb.numberOfGroups);
+      setNumberOfPlayersPerGroup(tournamentInDb.numberOfPlayersPerGroup);
+      setTeamsAdvancingPerGroup(tournamentInDb.teamsAdvancingPerGroup);
+      setPlayoffType(tournamentInDb.playoffType);
     }
 
     const cloneTournamentFromDb = async () => {
@@ -638,7 +642,7 @@ const CreateTournament = (props) => {
             </TextField>
             {tournamentType === 'league' &&
               <TextField id="outlined-basic"
-              label="Number of groups" 
+              label="Number of players"
               variant="outlined"
               type="number"
               value={numberOfPlayers}

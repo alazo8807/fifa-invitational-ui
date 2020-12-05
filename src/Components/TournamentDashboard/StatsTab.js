@@ -1,29 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import EnhancedTable from './EnhancedTable';
 import calculateStats from '../../Utils/calculateStats';
 
-
 const StatsTab = (props) => {
+  const [tournament, setTournament] = useState(props.tournament);
 
-  const getGroupedStats = (players, matches, numberOfGroups) => {
+  useEffect(()=>{
+    if (!props.tournament) return;
+    setTournament(props.tournament);
+  }, [props.tournament])
+
+  const getGroupedStats = ({ tournamentType, players, matches, numberOfGroups }) => {
     const stats = [];
     
-    for (let i = 1; i <= numberOfGroups; i++) {
-      const matchesInGroup = matches.filter(m => m.group === Number(i));
-      const groupStats = calculateStats(players, matchesInGroup);
-      stats.push({group: `Group ${String.fromCharCode(64 + i)}`, stats: groupStats});
+    if (tournamentType === 'league') {
+      const leagueStats = calculateStats(players, matches);
+      stats.push({group: null, stats: leagueStats});
+    }
+    else if (tournamentType === 'groupPlayoff') {
+      for (let i = 1; i <= numberOfGroups; i++) {
+        const matchesInGroup = matches.filter(m => m.group === Number(i));
+        const groupStats = calculateStats(players, matchesInGroup);
+        stats.push({group: `Group ${String.fromCharCode(64 + i)}`, stats: groupStats});
+      }
     }
 
     return stats;
   }
 
-  const { tournament } = props;
-  if (!tournament || !tournament.players || !tournament.matches || !tournament.numberOfGroups) return null;
-  const { players, matches, numberOfGroups } = tournament;
-
   return ( 
     <>
-    {getGroupedStats(players, matches, numberOfGroups).map(obj => (
+    {getGroupedStats(tournament).map(obj => (
       <>
       <EnhancedTable title={obj.group} stats={obj.stats} />
       </>

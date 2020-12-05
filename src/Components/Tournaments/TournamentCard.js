@@ -86,6 +86,20 @@ export default function TournamentCard(props) {
     }
   }
 
+  const getNumberOfPlayers = (data) => {
+    const { tournamentType } = data;
+
+    let numberOfPlayers = 0;
+    if (tournamentType === 'league') {
+      numberOfPlayers =  data.getNumberOfPlayers;
+    }
+    else if (tournamentType === 'groupPlayoff') {
+      numberOfPlayers =  data.numberOfGroups * data.numberOfPlayersPerGroup;
+    }
+
+    return numberOfPlayers;
+  }
+
   return (
     <Card className={classes.root}>
       <CardHeader
@@ -119,7 +133,7 @@ export default function TournamentCard(props) {
       />
       <CardActions className={classes.cardActions}>
         <div className={classes.badgeGroup}>
-          <Badge badgeContent={data.numberOfPlayers} color="primary">
+          <Badge badgeContent={getNumberOfPlayers(data)} color="primary">
             <GroupIcon />
           </Badge>
           <Badge badgeContent={data.matches.length} color="primary">

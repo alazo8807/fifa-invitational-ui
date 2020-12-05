@@ -111,7 +111,6 @@ export default function SignUpSide(props) {
   }
 
   /**
-   * 
    *  Handle Sign up clicked 
    */
   const handleSignUpClicked = async (e) => {
@@ -128,7 +127,6 @@ export default function SignUpSide(props) {
         setErrors(errors => errors = {...errors, email: ex.response.data});
       }
     }
-    
   }
 
   return (
@@ -191,10 +189,6 @@ export default function SignUpSide(props) {
               error={errors['password'] && errors['password'].length > 0}
               helperText={errors['password']}
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
             <Button
               type="submit"
               fullWidth
@@ -212,7 +206,7 @@ export default function SignUpSide(props) {
                 </Link>
               </Grid> */}
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/signin" variant="body2">
                   {"Already have an account? Sign in"}
                 </Link>
               </Grid>

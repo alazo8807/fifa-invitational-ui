@@ -20,7 +20,8 @@ const useStyles = makeStyles((theme) => ({
 
 const TournamentDashboard = (props) => {
   const classes = useStyles();
-  const [tournament, setTournament] = useState({});
+  const [tournament, setTournament] = useState();
+  const [matches, setMatches] = useState([]);
   const [tabValue, setTabValue] = React.useState(0);
 
   useEffect(()=>{
@@ -33,6 +34,9 @@ const TournamentDashboard = (props) => {
       
       // Pass tournament name up to navbar to display on app bar.
       setTournament(tournament);
+      setMatches(tournament.matches);
+
+      // Pass tournament name up to navbar to display on app bar.
       if (props.setDisplayName) props.setDisplayName(tournament.name);
     }
 
@@ -43,20 +47,31 @@ const TournamentDashboard = (props) => {
     setTabValue(newValue);
   };
 
-  const handleMatchesUpdate = (matches) => {
+  const handleMatchesUpdate = (updatedMatches) => {
     const updateInDb = async () => {
-      for (let match of matches) {
+      let newMatches = [...matches];
+
+      for (let match of updatedMatches) {
         await saveMatch(match);
+
+        let matchToUpdate = newMatches.find(m => m._id === match._id);
+        matchToUpdate = match;
       }
+
+      setMatches(newMatches);
     }
-    const tournamentUpdated = {...tournament};
-    tournamentUpdated.matches = matches;
-    setTournament(tournamentUpdated);
+
+    
+    // const tournamentUpdated = {...tournament};
+    // tournamentUpdated.matches = matches;
+    // setTournament(tournamentUpdated);
 
     updateInDb();
   }
 
   const handleTournamentUpdate = async (tournamentUpdated) => {
+    console.log("trying to save tournament", tournamentUpdated);
+    
     const { data: tournamentSaved } = await saveTournament(tournamentUpdated);
     
     const tournamentId = tournamentSaved._id;
@@ -66,13 +81,13 @@ const TournamentDashboard = (props) => {
       const result = await getTournament(tournamentId);
       tournament = result.data;
       
-      // Pass tournament name up to navbar to display on app bar.
       setTournament(tournament);
+      setMatches(tournament.matches);
     }
 
     getTournamentFromDb();
   }
-  
+
   return ( 
     <>
       <Paper square>
@@ -90,13 +105,36 @@ const TournamentDashboard = (props) => {
       <div className={classes.root}>
         {tabValue === 0 && <FixturesTab 
           tournament={tournament}
+          matches={matches}
           onMatchesUpdate={handleMatchesUpdate}
           onTournamentUpdate={handleTournamentUpdate}
           {...props} />}
+        {/* {tabValue === 0 && <TempTest 
+          tournament={tournament}
+          matches={matches}
+          onMatchesUpdate={handleMatchesUpdate}
+          onTournamentUpdate={handleTournamentUpdate}
+          {...props} />} */}
+
         {tabValue === 1 && <StatsTab tournament={tournament} />}
       </div>
     </>
    );
 }
+
+const TempTest = (props) => {
+  if (!props.tournament || !props.matches) return null;
+  return (
+    <>
+    <h1>Testing</h1>
+    {props.tournament.tournamentType}
+    {props.matches.map(match => (
+      <>
+      <p>{match._id}</p>
+      </>
+    ))}
+    </>
+  )
+} 
 
 export default withNavBar(TournamentDashboard);
