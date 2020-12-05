@@ -228,11 +228,9 @@ const FixturesTab = (props) => {
                   </CardContent>
                 </Card>
               </Grid>
-
             ))}
             </>
           ))}
-        
       </Grid>
     </div>
    );

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import EnhancedTable from './EnhancedTable';
 import calculateStats from '../../Utils/calculateStats';
 
-
 const StatsTab = (props) => {
   const [tournament, setTournament] = useState(props.tournament);
 

@@ -32,6 +32,7 @@ const TournamentDashboard = (props) => {
       const result = await getTournament(tournamentId);
       tournament = result.data;
       
+      // Pass tournament name up to navbar to display on app bar.
       setTournament(tournament);
       setMatches(tournament.matches);
 
