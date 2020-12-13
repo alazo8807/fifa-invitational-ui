@@ -14,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import auth, { login } from '../../Services/authService';
 import Joi from 'joi';
 import { Redirect } from 'react-router-dom';
+import { CircularProgress } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
+    minHeight: 36
   },
 }));
 
@@ -56,6 +58,7 @@ export default function SignInSide(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Validate a specific field
@@ -116,8 +119,10 @@ export default function SignInSide(props) {
 
     if (Object.keys(errors).length > 0) return;
 
+    setIsLoading(true);
+
     try {
-      const result = await login(email, password);
+      await login(email, password);
       window.location = '/';
     } catch (ex) {
       console.log(ex);
@@ -126,6 +131,8 @@ export default function SignInSide(props) {
         setErrors(errors => errors = {...errors, server: ex.response.data});
       }
     }
+
+    setIsLoading(false);
   }
 
   if (auth.getCurrentUser()) return <Redirect to="/" />
@@ -183,10 +190,11 @@ export default function SignInSide(props) {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={isLoading}
               onClick={handleSignInClicked}
               className={classes.submit}
             >
-              Sign In
+              {isLoading ? (<CircularProgress size={20} />) : 'Sign In'}
             </Button>
             <Grid container>
               {/* <Grid item xs>
