@@ -80,9 +80,6 @@ const calculateStats = (players, matches) => {
   for (let key in rowPlayers) {
     stats.push({playerId: key, ...rowPlayers[key]});
   }
-  // for (let values of Object.values(rowPlayers)) {
-  //   stats.push(values);
-  // }
 
   console.log('stats', stats);
 

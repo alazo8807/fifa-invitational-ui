@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FixturesTab from './FixturesTab';
-// import TableTab from './EnhancedTable';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { getTournament, saveTournament } from '../../Services/tournamentService';
 import { saveMatch } from '../../Services/matchesService';
-import calculateStats from '../../Utils/calculateStats';
 import withNavBar from '../hoc/withNavBar';
 import StatsTab from './StatsTab';
 
@@ -61,11 +59,6 @@ const TournamentDashboard = (props) => {
       setMatches(newMatches);
     }
 
-    
-    // const tournamentUpdated = {...tournament};
-    // tournamentUpdated.matches = matches;
-    // setTournament(tournamentUpdated);
-
     updateInDb();
   }
 
@@ -109,32 +102,10 @@ const TournamentDashboard = (props) => {
           onMatchesUpdate={handleMatchesUpdate}
           onTournamentUpdate={handleTournamentUpdate}
           {...props} />}
-        {/* {tabValue === 0 && <TempTest 
-          tournament={tournament}
-          matches={matches}
-          onMatchesUpdate={handleMatchesUpdate}
-          onTournamentUpdate={handleTournamentUpdate}
-          {...props} />} */}
-
         {tabValue === 1 && <StatsTab tournament={tournament} />}
       </div>
     </>
    );
 }
-
-const TempTest = (props) => {
-  if (!props.tournament || !props.matches) return null;
-  return (
-    <>
-    <h1>Testing</h1>
-    {props.tournament.tournamentType}
-    {props.matches.map(match => (
-      <>
-      <p>{match._id}</p>
-      </>
-    ))}
-    </>
-  )
-} 
 
 export default withNavBar(TournamentDashboard);
