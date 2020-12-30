@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Joi from 'joi';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -14,6 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { register } from '../../Services/userService';
 import { loginWithJwt } from '../../Services/authService';
+import { CircularProgress } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,6 +57,7 @@ export default function SignUpSide(props) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Validate a specific field
@@ -118,6 +118,8 @@ export default function SignUpSide(props) {
 
     if (Object.keys(errors).length > 0) return;
 
+    setIsLoading(true);
+
     try {
       const response = await register({ name, email, password });
       loginWithJwt(response.headers['x-auth-token']);
@@ -127,6 +129,8 @@ export default function SignUpSide(props) {
         setErrors(errors => errors = {...errors, email: ex.response.data});
       }
     }
+
+    setIsLoading(false);
   }
 
   return (
@@ -194,10 +198,11 @@ export default function SignUpSide(props) {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={isLoading}
               onClick={handleSignUpClicked}
               className={classes.submit}
             >
-              Sign Up
+              {isLoading ? (<CircularProgress size={20} />) : 'Sign In'}
             </Button>
             <Grid container>
               {/* <Grid item xs>
