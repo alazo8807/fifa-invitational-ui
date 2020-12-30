@@ -1,4 +1,4 @@
 {
-  "apiUrl": "https://fifa-invitational.herokuapp.com/api",
+  "apiUrl": "https://fifa-invitational-api.herokuapp.com/api",
   "apiUrlTemp": "https://localhost:3000/api"
 }
