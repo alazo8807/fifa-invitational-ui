@@ -202,7 +202,7 @@ export default function SignUpSide(props) {
               onClick={handleSignUpClicked}
               className={classes.submit}
             >
-              {isLoading ? (<CircularProgress size={20} />) : 'Sign In'}
+              {isLoading ? (<CircularProgress size={20} />) : 'Sign up'}
             </Button>
             <Grid container>
               {/* <Grid item xs>
@@ -212,7 +212,7 @@ export default function SignUpSide(props) {
               </Grid> */}
               <Grid item>
                 <Link href="/signin" variant="body2">
-                  {"Already have an account? Sign up"}
+                  {"Already have an account? Sign in"}
                 </Link>
               </Grid>
             </Grid>
