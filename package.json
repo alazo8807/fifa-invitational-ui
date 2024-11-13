@@ -17,16 +17,17 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^5.3.4",
     "react-scripts": "^5.0.1",
-    "react-wheel-of-prizes": "^1.1.0"
+    "react-wheel-of-prizes": "^1.1.0",
+    "serve": "^14.2.4"
+  },
+  "engines": {
+    "node": "14.19.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "serve -s build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "engines": {
-    "node": "14.18.2"
   },
   "eslintConfig": {
     "extends": "react-app"
