@@ -20,9 +20,6 @@
     "react-wheel-of-prizes": "^1.1.0",
     "serve": "^14.2.4"
   },
-  "engines": {
-    "node": "14.19.3"
-  },
   "scripts": {
     "start": "serve -s build",
     "build": "react-scripts build",
